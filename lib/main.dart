@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:djossi/login_screen.dart';
 import 'package:djossi/my_constants.dart';
 import 'package:djossi/register_screen.dart';
@@ -32,7 +34,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         imageUrl: "",
         title: "Disponible à Abidjan",
         description:
-            "Choisissez les meuilleurs pour vos taches. Trouvez tous les professionnels de toutes vos tache ici!"),
+            "Choisissez les meuilleurs pour vos taches. Trouvez tous les professionnels de toutes vos tache ici!Choisissez les meuilleurs pour vos taches. Trouvez tous les professionnels de toutes vos tache ici!Choisissez les meuilleurs pour vos taches. !"),
     const WelcomeScreenSliders(
         imageUrl: "",
         title: "C'est mieux de bien faire",
@@ -55,8 +57,194 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             "Une equipe prete a vous satisfaire quelque soit la difficulté de la tache!"),
   ];
 
+  TextStyle getFontStyleFromMediaSize(w, h, tVal, fVal) {
+    return MediaQuery.of(context).size.width < 384 &&
+            MediaQuery.of(context).size.height < 640
+        ? tVal
+        : fVal;
+  }
+
+  List<String> languageList = [
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+    "Français",
+    "Anglais",
+  ];
+
+  List<String> deviseList = [
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+    "XOF",
+    "Euro",
+  ];
+
   late int welcomeScreenSlidersCurrentIndex = 0;
   late bool isLanguageButtonClicked = false;
+  late bool isDeviseButtonClicked = false;
+
+  final _random = Random();
+
+  Column getButtomListView(title, subtitle, content) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(""),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isDeviseButtonClicked = !isDeviseButtonClicked;
+                        isLanguageButtonClicked = !isLanguageButtonClicked;
+                      });
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: myPrimaryColor),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 25),
+                              ),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  fontSize: myTextMediumFontSize2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: content.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 20),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: colorsList[
+                                            _random.nextInt(colorsList.length)],
+                                      ),
+                                      child: const SizedBox(
+                                        height: 40,
+                                        width: 40,
+                                        child: Icon(
+                                          Icons.abc,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    content[index],
+                                  ),
+                                ],
+                              ),
+                              const Icon(
+                                Icons.circle,
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,13 +289,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
+                        isDeviseButtonClicked = !isDeviseButtonClicked;
                         isLanguageButtonClicked = !isLanguageButtonClicked;
                       });
                     },
                     child: Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.green,
+                        color: colorsList[_random.nextInt(colorsList.length)],
                       ),
                       child: const SizedBox(
                         width: 40,
@@ -118,6 +307,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -130,11 +320,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     right: 8,
                   ),
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      setState(() {
+                        isDeviseButtonClicked = !isDeviseButtonClicked;
+                        isLanguageButtonClicked = !isLanguageButtonClicked;
+                      });
+                    },
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: myPrimaryColor,
+                        color: colorsList[_random.nextInt(colorsList.length)],
                       ),
                       child: const SizedBox(
                         width: 40,
@@ -145,6 +340,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -174,7 +370,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               options: CarouselOptions(
                                 viewportFraction: 1,
                                 height:
-                                    MediaQuery.of(context).size.height / 2.5,
+                                    MediaQuery.of(context).size.height * 0.5,
                                 initialPage: 0,
                                 onPageChanged: (index, reason) {
                                   setState(() {
@@ -215,16 +411,34 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                                   top: 30, bottom: 10),
                                               child: Text(
                                                 item.title,
-                                                style: TextStyle(
-                                                    fontSize: myTextBigFontSize,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                style:
+                                                    getFontStyleFromMediaSize(
+                                                  384,
+                                                  640,
+                                                  TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize:
+                                                          myTextSmallFontSize),
+                                                  TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize:
+                                                          myTextBigFontSize),
+                                                ),
                                               ),
                                             ),
                                             Text(
                                               item.description,
-                                              style: TextStyle(
-                                                fontSize: myTextMediumFontSize,
+                                              style: getFontStyleFromMediaSize(
+                                                384,
+                                                640,
+                                                TextStyle(
+                                                    fontSize:
+                                                        myTextSmallFontSize),
+                                                TextStyle(
+                                                    fontSize:
+                                                        myTextMediumFontSize),
                                               ),
                                             ),
                                           ],
@@ -256,9 +470,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 "DJOSSI: rien ne nous arrete",
-                                style: TextStyle(
-                                  fontSize: myTextMediumFontSize2,
-                                  fontWeight: myNormalFontWeight2,
+                                style: getFontStyleFromMediaSize(
+                                  384,
+                                  640,
+                                  TextStyle(
+                                      fontSize: myTextSmallFontSize,
+                                      fontWeight: myNormalFontWeight),
+                                  TextStyle(
+                                      fontSize: myTextMediumFontSize,
+                                      fontWeight: myNormalFontWeight),
                                 ),
                               ),
                             ),
@@ -341,54 +561,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ],
               ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(""),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isLanguageButtonClicked =
-                                      !isLanguageButtonClicked;
-                                });
-                              },
-                              icon: const Icon(Icons.clear),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Container(
-                    color: Colors.red,
-                    child: const Column(
-                      children: [
-                        Text("data"),
-                        Text("data"),
-                        Text("data"),
-                        Text("data"),
-                        Text("data"),
-                        Text("data"),
-                        Text("data"),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            AnimatedContainer(
+              height: isLanguageButtonClicked
+                  ? MediaQuery.of(context).size.height * 0.8
+                  : 0,
+              duration: const Duration(milliseconds: 200),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  isLanguageButtonClicked
+                      ? getButtomListView(
+                          "Selzctionnez une langue",
+                          "veuillez selectionnez une langue qui vous convient:",
+                          languageList)
+                      : const Text(""),
+                  isDeviseButtonClicked
+                      ? getButtomListView(
+                          "Selzctionnez une devise",
+                          "veuillez selectionnez une devise qui vous convient:",
+                          deviseList)
+                      : const Text(""),
+                ],
+              ),
             ),
           ],
         ),
