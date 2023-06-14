@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_indicator/carousel_indicator.dart';
 
+import 'my_functions.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -56,13 +58,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         description:
             "Une equipe prete a vous satisfaire quelque soit la difficulté de la tache!"),
   ];
-
-  TextStyle getFontStyleFromMediaSize(w, h, tVal, fVal) {
-    return MediaQuery.of(context).size.width < 384 &&
-            MediaQuery.of(context).size.height < 640
-        ? tVal
-        : fVal;
-  }
 
   List<String> languageList = [
     "Français",
@@ -114,137 +109,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     "Euro",
   ];
 
+  String listViewTitle = "Selectionnez une langue";
+  String listViewSubtitle =
+      "veuillez selectionnez une langue qui vous convient:";
+  List<String> listViewContent = [];
+
   late int welcomeScreenSlidersCurrentIndex = 0;
-  late bool isLanguageButtonClicked = false;
-  late bool isDeviseButtonClicked = false;
+  late bool isBottomListViewOpen = false;
 
   final _random = Random();
-
-  Column getButtomListView(title, subtitle, content) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(""),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Container(
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isDeviseButtonClicked = !isDeviseButtonClicked;
-                        isLanguageButtonClicked = !isLanguageButtonClicked;
-                      });
-                    },
-                    icon: const Icon(Icons.clear),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: myPrimaryColor),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 25),
-                              ),
-                              Text(
-                                subtitle,
-                                style: TextStyle(
-                                  fontSize: myTextMediumFontSize2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: content.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 20),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: colorsList[
-                                            _random.nextInt(colorsList.length)],
-                                      ),
-                                      child: const SizedBox(
-                                        height: 40,
-                                        width: 40,
-                                        child: Icon(
-                                          Icons.abc,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    content[index],
-                                  ),
-                                ],
-                              ),
-                              const Icon(
-                                Icons.circle,
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +125,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          elevation: 0,
           titleSpacing: 0,
           leading: Center(
             child: Icon(
@@ -289,8 +163,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        isDeviseButtonClicked = !isDeviseButtonClicked;
-                        isLanguageButtonClicked = !isLanguageButtonClicked;
+                        listViewTitle = "Selectionnez une langue";
+                        listViewSubtitle =
+                            "veuillez selectionnez une langue qui vous convient:";
+                        listViewContent = languageList;
+                        isBottomListViewOpen = !isBottomListViewOpen;
                       });
                     },
                     child: Container(
@@ -322,8 +199,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        isDeviseButtonClicked = !isDeviseButtonClicked;
-                        isLanguageButtonClicked = !isLanguageButtonClicked;
+                        listViewTitle = "Selectionnez une devise";
+                        listViewSubtitle =
+                            "veuillez selectionnez une devise qui vous convient:";
+                        listViewContent = deviseList;
+                        isBottomListViewOpen = !isBottomListViewOpen;
                       });
                     },
                     child: Container(
@@ -413,6 +293,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                                 item.title,
                                                 style:
                                                     getFontStyleFromMediaSize(
+                                                  context,
                                                   384,
                                                   640,
                                                   TextStyle(
@@ -431,6 +312,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             Text(
                                               item.description,
                                               style: getFontStyleFromMediaSize(
+                                                context,
                                                 384,
                                                 640,
                                                 TextStyle(
@@ -471,6 +353,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               child: Text(
                                 "DJOSSI: rien ne nous arrete",
                                 style: getFontStyleFromMediaSize(
+                                  context,
                                   384,
                                   640,
                                   TextStyle(
@@ -562,7 +445,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ),
             AnimatedContainer(
-              height: isLanguageButtonClicked
+              height: isBottomListViewOpen
                   ? MediaQuery.of(context).size.height * 0.8
                   : 0,
               duration: const Duration(milliseconds: 200),
@@ -570,18 +453,145 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  isLanguageButtonClicked
-                      ? getButtomListView(
-                          "Selzctionnez une langue",
-                          "veuillez selectionnez une langue qui vous convient:",
-                          languageList)
-                      : const Text(""),
-                  isDeviseButtonClicked
-                      ? getButtomListView(
-                          "Selzctionnez une devise",
-                          "veuillez selectionnez une devise qui vous convient:",
-                          deviseList)
-                      : const Text(""),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(""),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isBottomListViewOpen = !isBottomListViewOpen;
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Container(
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: myPrimaryColor),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          listViewTitle,
+                                          style: getFontStyleFromMediaSize(
+                                            context,
+                                            384,
+                                            640,
+                                            const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20),
+                                            const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 25),
+                                          ),
+                                        ),
+                                        Text(
+                                          listViewSubtitle,
+                                          style: getFontStyleFromMediaSize(
+                                            context,
+                                            384,
+                                            640,
+                                            TextStyle(
+                                                fontSize: myTextSmallFontSize2),
+                                            TextStyle(
+                                                fontSize:
+                                                    myTextMediumFontSize2),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: listViewContent.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: GestureDetector(
+                                      onTap: () {},
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 20),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: colorsList[
+                                                        _random.nextInt(
+                                                            colorsList.length)],
+                                                  ),
+                                                  child: const SizedBox(
+                                                    height: 40,
+                                                    width: 40,
+                                                    child: Icon(
+                                                      Icons.abc,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                listViewContent[index],
+                                              ),
+                                            ],
+                                          ),
+                                          const Icon(
+                                            Icons.circle,
+                                            color: Colors.blue,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
