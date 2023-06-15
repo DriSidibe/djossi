@@ -62,49 +62,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   List<String> languageList = [
     "Français",
     "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
-    "Français",
-    "Anglais",
   ];
 
   List<String> deviseList = [
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
-    "XOF",
-    "Euro",
     "XOF",
     "Euro",
   ];
@@ -157,35 +117,36 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(
-                    right: 8,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        listViewTitle = "Selectionnez une langue";
-                        listViewSubtitle =
-                            "veuillez selectionnez une langue qui vous convient:";
-                        listViewContent = languageList;
-                        isBottomListViewOpen = !isBottomListViewOpen;
-                      });
+                  padding: const EdgeInsets.only(right: 8),
+                  child: PopupMenuButton(
+                    onSelected: null,
+                    padding: EdgeInsets.zero,
+                    // initialValue: choices[_selection],
+                    itemBuilder: (BuildContext context) {
+                      return languageList.map(
+                        (String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                          );
+                        },
+                      ).toList();
                     },
+
                     child: Container(
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: colorsList[_random.nextInt(colorsList.length)],
                       ),
-                      child: const SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            "FR",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: const Center(
+                        child: Text(
+                          "FR",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -193,409 +154,239 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(
-                    right: 8,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        listViewTitle = "Selectionnez une devise";
-                        listViewSubtitle =
-                            "veuillez selectionnez une devise qui vous convient:";
-                        listViewContent = deviseList;
-                        isBottomListViewOpen = !isBottomListViewOpen;
-                      });
+                  padding: const EdgeInsets.only(right: 8),
+                  child: PopupMenuButton(
+                    onSelected: null,
+                    padding: EdgeInsets.zero,
+                    // initialValue: choices[_selection],
+                    itemBuilder: (BuildContext context) {
+                      return deviseList.map(
+                        (String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                          );
+                        },
+                      ).toList();
                     },
                     child: Container(
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
                         color: colorsList[_random.nextInt(colorsList.length)],
+                        shape: BoxShape.circle,
                       ),
-                      child: const SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: Center(
-                          child: Text(
-                            "XOF",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      child: const Center(
+                        child: Text(
+                          "XOF",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                )
               ],
             )
           ],
           backgroundColor: Colors.white,
         ),
-        body: Stack(
-          alignment: AlignmentDirectional.bottomCenter,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Column(
-                    children: [
-                      SizedBox(
-                        child: Column(
-                          children: [
-                            CarouselSlider(
-                              options: CarouselOptions(
-                                viewportFraction: 1,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.5,
-                                initialPage: 0,
-                                onPageChanged: (index, reason) {
-                                  setState(() {
-                                    welcomeScreenSlidersCurrentIndex = index;
-                                  });
-                                },
-                              ),
-                              items: welcomeScreenSliders.map(
-                                (item) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                          horizontal: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              (1 / 10),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(
-                                              height: MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  4,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: myPrimaryColor),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 30, bottom: 10),
-                                              child: Text(
-                                                item.title,
-                                                style:
-                                                    getFontStyleFromMediaSize(
-                                                  context,
-                                                  384,
-                                                  640,
-                                                  TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize:
-                                                          myTextSmallFontSize),
-                                                  TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize:
-                                                          myTextBigFontSize),
-                                                ),
-                                              ),
-                                            ),
-                                            Text(
-                                              item.description,
-                                              style: getFontStyleFromMediaSize(
-                                                context,
-                                                384,
-                                                640,
-                                                TextStyle(
-                                                    fontSize:
-                                                        myTextSmallFontSize),
-                                                TextStyle(
-                                                    fontSize:
-                                                        myTextMediumFontSize),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Center(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Expanded(
-                                child: CarouselIndicator(
-                                  activeColor: myPrimaryColor,
-                                  color: Colors.grey,
-                                  count: welcomeScreenSliders.length,
-                                  index: welcomeScreenSlidersCurrentIndex,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "DJOSSI: rien ne nous arrete",
-                                style: getFontStyleFromMediaSize(
-                                  context,
-                                  384,
-                                  640,
-                                  TextStyle(
-                                      fontSize: myTextSmallFontSize,
-                                      fontWeight: myNormalFontWeight),
-                                  TextStyle(
-                                      fontSize: myTextMediumFontSize,
-                                      fontWeight: myNormalFontWeight),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width /
-                                          2.5,
-                                      child: TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const Login()),
-                                          );
-                                        },
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                              MaterialStatePropertyAll(
-                                                  myPrimaryColor),
-                                        ),
-                                        child: const Padding(
-                                          padding: EdgeInsets.only(
-                                              top: 8.0, bottom: 8),
-                                          child: Text(
-                                            "SE CONNECTER",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width /
-                                          2.5,
-                                      child: TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const Registrer()),
-                                          );
-                                        },
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                              MaterialStatePropertyAll(
-                                                  myPrimaryColor),
-                                        ),
-                                        child: const Padding(
-                                          padding: EdgeInsets.only(
-                                              top: 8.0, bottom: 8),
-                                          child: Text(
-                                            "S'INSCRIRE",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            AnimatedContainer(
-              height: isBottomListViewOpen
-                  ? MediaQuery.of(context).size.height * 0.8
-                  : 0,
-              duration: const Duration(milliseconds: 200),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
+        body: Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Column(
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        const Text(""),
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isBottomListViewOpen = !isBottomListViewOpen;
-                                });
-                              },
-                              icon: const Icon(Icons.clear),
-                            ),
+                        CarouselSlider(
+                          options: CarouselOptions(
+                            viewportFraction: 1,
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            initialPage: 0,
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                welcomeScreenSlidersCurrentIndex = index;
+                              });
+                            },
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      child: Container(
-                        color: Colors.white,
-                        child: Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(color: myPrimaryColor),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(20),
+                          items: welcomeScreenSliders.map(
+                            (item) {
+                              return Builder(
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal:
+                                          MediaQuery.of(context).size.width *
+                                              (1 / 10),
+                                    ),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          listViewTitle,
-                                          style: getFontStyleFromMediaSize(
-                                            context,
-                                            384,
-                                            640,
-                                            const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20),
-                                            const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 25),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              4,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: myPrimaryColor),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 30, bottom: 10),
+                                          child: Text(
+                                            item.title,
+                                            style: getFontStyleFromMediaSize(
+                                              context,
+                                              384,
+                                              640,
+                                              TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize:
+                                                      myTextSmallFontSize),
+                                              TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: myTextBigFontSize),
+                                            ),
                                           ),
                                         ),
                                         Text(
-                                          listViewSubtitle,
+                                          item.description,
                                           style: getFontStyleFromMediaSize(
                                             context,
                                             384,
                                             640,
                                             TextStyle(
-                                                fontSize: myTextSmallFontSize2),
+                                                fontSize: myTextSmallFontSize),
                                             TextStyle(
-                                                fontSize:
-                                                    myTextMediumFontSize2),
+                                                fontSize: myTextMediumFontSize),
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: listViewContent.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: GestureDetector(
-                                      onTap: () {},
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 20),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: colorsList[
-                                                        _random.nextInt(
-                                                            colorsList.length)],
-                                                  ),
-                                                  child: const SizedBox(
-                                                    height: 40,
-                                                    width: 40,
-                                                    child: Icon(
-                                                      Icons.abc,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                listViewContent[index],
-                                              ),
-                                            ],
-                                          ),
-                                          const Icon(
-                                            Icons.circle,
-                                            color: Colors.blue,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   );
                                 },
-                              ),
-                            ),
-                          ],
+                              );
+                            },
+                          ).toList(),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                  Center(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Expanded(
+                            child: CarouselIndicator(
+                              activeColor: myPrimaryColor,
+                              color: Colors.grey,
+                              count: welcomeScreenSliders.length,
+                              index: welcomeScreenSlidersCurrentIndex,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "DJOSSI: rien ne nous arrete",
+                            style: getFontStyleFromMediaSize(
+                              context,
+                              384,
+                              640,
+                              TextStyle(
+                                  fontSize: myTextSmallFontSize,
+                                  fontWeight: myNormalFontWeight),
+                              TextStyle(
+                                  fontSize: myTextMediumFontSize,
+                                  fontWeight: myNormalFontWeight),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.5,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Login()),
+                                      );
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          myPrimaryColor),
+                                    ),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsets.only(top: 8.0, bottom: 8),
+                                      child: Text(
+                                        "SE CONNECTER",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.5,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Registrer()),
+                                      );
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          myPrimaryColor),
+                                    ),
+                                    child: const Padding(
+                                      padding:
+                                          EdgeInsets.only(top: 8.0, bottom: 8),
+                                      child: Text(
+                                        "S'INSCRIRE",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
