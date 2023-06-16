@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 Color myPrimaryColor = Colors.blue;
+double myTitleFontSize = 30.0;
 double myTextBigFontSize = 20.0;
 double myTextSmallFontSize = 10.0;
 double myTextSmallFontSize2 = 12.0;

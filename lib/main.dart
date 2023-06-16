@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:djossi/login_screen.dart';
-import 'package:djossi/my_constants.dart';
 import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_indicator/carousel_indicator.dart';
 
 import 'my_functions.dart';
+import 'package:djossi/my_constants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -59,15 +59,28 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             "Une equipe prete a vous satisfaire quelque soit la difficulté de la tache!"),
   ];
 
-  List<String> languageList = [
-    "Français",
-    "Anglais",
-  ];
+  Map<String, String> languageList = {
+    "FR": "Français",
+    "EN": "Anglais",
+  };
 
   List<String> deviseList = [
     "XOF",
-    "Euro",
+    "EUR",
   ];
+
+  String choosenLanguage = "FR";
+  String choosenDevise = "XOF";
+
+  void _select(String choice) {
+    setState(() {
+      if (languageList.containsKey(choice)) {
+        choosenLanguage = choice;
+      } else {
+        choosenDevise = choice;
+      }
+    });
+  }
 
   String listViewTitle = "Selectionnez une langue";
   String listViewSubtitle =
@@ -119,15 +132,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: PopupMenuButton(
-                    onSelected: null,
+                    onSelected: _select,
                     padding: EdgeInsets.zero,
                     // initialValue: choices[_selection],
                     itemBuilder: (BuildContext context) {
-                      return languageList.map(
-                        (String choice) {
+                      return languageList.values.map(
+                        (value) {
                           return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
+                            value: languageList.keys.firstWhere(
+                                (k) => languageList[k] == value,
+                                orElse: () => ""),
+                            child: Text(value),
                           );
                         },
                       ).toList();
@@ -140,10 +155,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         shape: BoxShape.circle,
                         color: colorsList[_random.nextInt(colorsList.length)],
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          "FR",
-                          style: TextStyle(
+                          choosenLanguage,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -156,7 +171,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: PopupMenuButton(
-                    onSelected: null,
+                    onSelected: _select,
                     padding: EdgeInsets.zero,
                     // initialValue: choices[_selection],
                     itemBuilder: (BuildContext context) {
@@ -176,10 +191,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         color: colorsList[_random.nextInt(colorsList.length)],
                         shape: BoxShape.circle,
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          "XOF",
-                          style: TextStyle(
+                          choosenDevise,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

@@ -1,4 +1,7 @@
+import 'package:djossi/my_constants.dart';
 import 'package:flutter/material.dart';
+
+import 'my_functions.dart';
 
 class Base extends StatefulWidget {
   const Base({super.key});
@@ -33,10 +36,7 @@ class _BottomNavigationBarExampleState
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Index 0: Home',
-      style: optionStyle,
-    ),
+    AcceuilScreen(),
     Text(
       'Index 1: Business',
       style: optionStyle,
@@ -84,9 +84,51 @@ class _BottomNavigationBarExampleState
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: myPrimaryColor,
         onTap: _onItemTapped,
       ),
+    );
+  }
+}
+
+class AcceuilScreen extends StatefulWidget {
+  const AcceuilScreen({super.key});
+
+  @override
+  State<AcceuilScreen> createState() => _AcceuilScreenState();
+}
+
+class _AcceuilScreenState extends State<AcceuilScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SafeArea(
+          child: Container(
+            alignment: Alignment.center,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: myPrimaryColor,
+            ),
+            child: Text(
+              "Qui cherchez vous?",
+              style: getFontStyleFromMediaSize(
+                context,
+                384,
+                640,
+                TextStyle(
+                  color: Colors.white,
+                  fontSize: myTitleFontSize,
+                ),
+                TextStyle(
+                  color: Colors.white,
+                  fontSize: myTitleFontSize,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
