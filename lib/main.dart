@@ -305,6 +305,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           padding: const EdgeInsets.all(8.0),
                           child: Expanded(
                             child: CarouselIndicator(
+                              height: 10,
+                              width: 10,
                               activeColor: myPrimaryColor,
                               color: Colors.grey,
                               count: welcomeScreenSliders.length,
