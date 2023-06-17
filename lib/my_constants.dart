@@ -8,6 +8,8 @@ double myTextSmallFontSize2 = 12.0;
 double myTextMediumFontSize = 15.0;
 double myTextMediumFontSize2 = 17.0;
 
+double myIconSmallSize = 15;
+
 FontWeight myNormalFontWeight = FontWeight.w300;
 FontWeight myNormalFontWeight2 = FontWeight.w200;
 
