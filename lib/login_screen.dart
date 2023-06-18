@@ -82,8 +82,8 @@ class _LoginState extends State<Login> {
                             Padding(
                               padding:
                                   const EdgeInsets.only(top: 8, bottom: 20),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                              child: Wrap(
+                                alignment: WrapAlignment.end,
                                 children: [
                                   Text(
                                     "Entrez le numero mobile sans le '+' ou le 00 ou le code du pays.",

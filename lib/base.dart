@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:djossi/available_workers_list.dart';
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -41,14 +43,6 @@ class _BottomNavigationBarExampleState
   static const List<Widget> _widgetOptions = <Widget>[
     AcceuilScreen(),
     Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-    Text(
       'Index 2: School',
       style: optionStyle,
     ),
@@ -62,34 +56,33 @@ class _BottomNavigationBarExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: const Color.fromARGB(255, 110, 107, 107),
-        showUnselectedLabels: true,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.note),
-            label: 'Reservation',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.wallet),
-            label: 'Portefeuille',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.contact_emergency),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: myPrimaryColor,
-        onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: () {
+        exit(0);
+      },
+      child: Scaffold(
+        body: Center(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          unselectedItemColor: const Color.fromARGB(255, 110, 107, 107),
+          showUnselectedLabels: true,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              tooltip: "Accueil",
+              icon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              tooltip: "Profil",
+              icon: Icon(Icons.contact_emergency),
+              label: 'Profil',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: myPrimaryColor,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:djossi/my_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_selector/flutter_custom_selector.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import 'login_screen.dart';
@@ -20,6 +23,64 @@ class _RegistrerState extends State<Registrer> {
     "Plombier",
     "Menuisier"
   ];
+  final photoNameFieldController = TextEditingController();
+  File? galleryFile;
+  final picker = ImagePicker();
+
+  @override
+  void dispose() {
+    photoNameFieldController.dispose();
+    super.dispose();
+  }
+
+  void _showPicker({
+    required BuildContext context,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future getImage(
+    ImageSource img,
+  ) async {
+    final pickedFile = await picker.pickImage(source: img);
+    XFile? xfilePick = pickedFile;
+    setState(
+      () {
+        if (xfilePick != null) {
+          galleryFile = File(pickedFile!.path);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
+              const SnackBar(content: Text('Nothing is selected')));
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,6 +277,78 @@ class _RegistrerState extends State<Registrer> {
                                 },
                               ),
                             ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: TextFormField(
+                            obscureText: isPasswordVisible,
+                            cursorColor: myPrimaryColor,
+                            decoration: InputDecoration(
+                              hintText: "Confirmer le mot de passe",
+                              hintStyle: getFontStyleFromMediaSize(
+                                context,
+                                384,
+                                640,
+                                TextStyle(fontSize: myTextSmallFontSize2),
+                                TextStyle(fontSize: myTextMediumFontSize),
+                              ),
+                              focusColor: myPrimaryColor,
+                              suffixIcon: IconButton(
+                                icon: isPasswordVisible
+                                    ? const Icon(Icons.visibility_off)
+                                    : const Icon(Icons.visibility),
+                                onPressed: () {
+                                  setState(
+                                    () {
+                                      isPasswordVisible = !isPasswordVisible;
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(right: 8.0),
+                                child: Text("Mettez une photo :"),
+                              ),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: photoNameFieldController,
+                                  enabled: false,
+                                  cursorColor: myPrimaryColor,
+                                  decoration: InputDecoration(
+                                    hintText: "Photo",
+                                    hintStyle: getFontStyleFromMediaSize(
+                                      context,
+                                      384,
+                                      640,
+                                      TextStyle(fontSize: myTextSmallFontSize2),
+                                      TextStyle(fontSize: myTextMediumFontSize),
+                                    ),
+                                    focusColor: myPrimaryColor,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.add_a_photo,
+                                ),
+                                onPressed: () {
+                                  _showPicker(context: context);
+                                  if (galleryFile != null) {
+                                    photoNameFieldController.text =
+                                        galleryFile!.path;
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                         ),
                         Padding(
