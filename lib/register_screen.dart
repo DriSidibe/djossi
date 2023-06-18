@@ -1,5 +1,7 @@
 import 'package:djossi/my_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_selector/flutter_custom_selector.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 import 'login_screen.dart';
 import 'my_functions.dart';
@@ -13,6 +15,11 @@ class Registrer extends StatefulWidget {
 
 class _RegistrerState extends State<Registrer> {
   bool isPasswordVisible = true;
+  List<String> jobsList = [
+    "--selectionnez un métier--",
+    "Plombier",
+    "Menuisier"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +111,7 @@ class _RegistrerState extends State<Registrer> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 20),
                           child: TextFormField(
                             cursorColor: myPrimaryColor,
                             decoration: InputDecoration(
@@ -121,12 +128,73 @@ class _RegistrerState extends State<Registrer> {
                           ),
                         ),
                         Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: IntlPhoneField(
+                            decoration: const InputDecoration(
+                              labelText: 'Numero de telephone',
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(),
+                              ),
+                            ),
+                            initialCountryCode: 'IN',
+                            onChanged: (phone) {},
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: CustomSingleSelectField<String>(
+                            selectedItemColor: myPrimaryColor,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.black,
+                              )),
+                              suffix: Icon(Icons.unfold_more),
+                            ),
+                            items: jobsList,
+                            title: "Metier",
+                            initialValue: jobsList[0],
+                            onSelectionDone: (value) {},
+                            itemAsString: (item) => item,
+                          ),
+                        ),
+                        Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: TextFormField(
                             obscureText: isPasswordVisible,
                             cursorColor: myPrimaryColor,
                             decoration: InputDecoration(
                               hintText: "Mot de passe",
+                              hintStyle: getFontStyleFromMediaSize(
+                                context,
+                                384,
+                                640,
+                                TextStyle(fontSize: myTextSmallFontSize2),
+                                TextStyle(fontSize: myTextMediumFontSize),
+                              ),
+                              focusColor: myPrimaryColor,
+                              suffixIcon: IconButton(
+                                icon: isPasswordVisible
+                                    ? const Icon(Icons.visibility_off)
+                                    : const Icon(Icons.visibility),
+                                onPressed: () {
+                                  setState(
+                                    () {
+                                      isPasswordVisible = !isPasswordVisible;
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: TextFormField(
+                            obscureText: isPasswordVisible,
+                            cursorColor: myPrimaryColor,
+                            decoration: InputDecoration(
+                              hintText: "Confirmer le mot de passe",
                               hintStyle: getFontStyleFromMediaSize(
                                 context,
                                 384,

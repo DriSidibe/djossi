@@ -35,6 +35,9 @@ dependencies:
   fluentui_system_icons: ^1.1.203
   url_launcher: ^6.1.11
   flutter_rating_bar: ^4.0.1
+  intl_phone_field: ^3.1.0
+  flutter_custom_selector: ^0.0.3
+
 
 
   # The following adds the Cupertino Icons font to your application.
