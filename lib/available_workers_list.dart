@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:djossi/workers_details.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import 'my_constants.dart';
 import 'my_functions.dart';
@@ -16,7 +17,8 @@ class WorkersList extends StatefulWidget {
 }
 
 class _WorkersListState extends State<WorkersList> {
-  Padding availableWorker(icon, firstname, lastname, contact, description) {
+  Padding availableWorker(
+      icon, firstname, lastname, contact, description, rate) {
     final random = Random();
     final choosenColor = colorsList[random.nextInt(colorsList.length)];
 
@@ -32,6 +34,7 @@ class _WorkersListState extends State<WorkersList> {
                 lastname: lastname,
                 description: description,
                 contact: contact,
+                rate: rate,
               ),
             ),
           );
@@ -147,18 +150,27 @@ class _WorkersListState extends State<WorkersList> {
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    contact,
-                                    style: getFontStyleFromMediaSize(
-                                      context,
-                                      384,
-                                      640,
-                                      TextStyle(
-                                        fontWeight: myNormalFontWeight,
-                                        fontSize: myTextSmallFontSize,
-                                      ),
-                                      TextStyle(
-                                        fontSize: myTextSmallFontSize2,
+                                  GestureDetector(
+                                    onTap: () {
+                                      String urlTarget = contact;
+                                      urlLauncher(
+                                        Uri.parse('tel:$urlTarget'),
+                                      );
+                                    },
+                                    child: Text(
+                                      contact,
+                                      style: getFontStyleFromMediaSize(
+                                        context,
+                                        384,
+                                        640,
+                                        TextStyle(
+                                          fontWeight: myNormalFontWeight,
+                                          color: myPrimaryColor,
+                                        ),
+                                        TextStyle(
+                                          fontSize: myTextSmallFontSize2,
+                                          color: myPrimaryColor,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -167,14 +179,28 @@ class _WorkersListState extends State<WorkersList> {
                             ),
                           ],
                         ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: myPrimaryColor,
-                              size: myIconSmallSize,
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Row(
+                            children: [
+                              RatingBar.builder(
+                                itemSize: myIconSmallSize,
+                                initialRating: rate.toDouble(),
+                                minRating: 1,
+                                direction: Axis.horizontal,
+                                allowHalfRating: true,
+                                itemCount: 5,
+                                itemPadding:
+                                    const EdgeInsets.symmetric(horizontal: 4.0),
+                                itemBuilder: (context, _) => Icon(
+                                  Icons.star,
+                                  color: myPrimaryColor,
+                                ),
+                                ignoreGestures: true,
+                                onRatingUpdate: (rating) {},
+                              ),
+                            ],
+                          ),
                         )
                       ],
                     ),
@@ -283,7 +309,8 @@ class _WorkersListState extends State<WorkersList> {
                     "Drissa",
                     "Sidibe",
                     "0556884867",
-                    "Je suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibeJe suis drissa sidibe",
+                    "Je suis drissa sidibe",
+                    4,
                   ),
                   availableWorker(
                     FluentIcons.contact_card_16_regular,
@@ -291,6 +318,7 @@ class _WorkersListState extends State<WorkersList> {
                     "Brou",
                     "0757884867",
                     "Je suis drissa Brou",
+                    3.5,
                   ),
                   availableWorker(
                     FluentIcons.contact_card_16_regular,
@@ -298,6 +326,7 @@ class _WorkersListState extends State<WorkersList> {
                     "Mbappe",
                     "0151884867",
                     "Je suis drissa Mbappe",
+                    5,
                   ),
                 ],
               ),
