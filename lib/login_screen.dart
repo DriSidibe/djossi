@@ -148,7 +148,8 @@ class _LoginState extends State<Login> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const Base()),
+                                builder: (context) => const Base(),
+                              ),
                             );
                           },
                           style: ButtonStyle(

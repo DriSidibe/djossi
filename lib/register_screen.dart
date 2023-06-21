@@ -281,36 +281,6 @@ class _RegistrerState extends State<Registrer> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: TextFormField(
-                            obscureText: isPasswordVisible,
-                            cursorColor: myPrimaryColor,
-                            decoration: InputDecoration(
-                              hintText: "Confirmer le mot de passe",
-                              hintStyle: getFontStyleFromMediaSize(
-                                context,
-                                384,
-                                640,
-                                TextStyle(fontSize: myTextSmallFontSize2),
-                                TextStyle(fontSize: myTextMediumFontSize),
-                              ),
-                              focusColor: myPrimaryColor,
-                              suffixIcon: IconButton(
-                                icon: isPasswordVisible
-                                    ? const Icon(Icons.visibility_off)
-                                    : const Icon(Icons.visibility),
-                                onPressed: () {
-                                  setState(
-                                    () {
-                                      isPasswordVisible = !isPasswordVisible;
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
