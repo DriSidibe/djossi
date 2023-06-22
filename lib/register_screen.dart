@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:djossi/my_constants.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_selector/flutter_custom_selector.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:http/http.dart' as http;
 
 import 'login_screen.dart';
 import 'my_functions.dart';
@@ -82,6 +86,17 @@ class _RegistrerState extends State<Registrer> {
     );
   }
 
+  var firstnameTextFieldController = TextEditingController();
+  var lastnameTextFieldController = TextEditingController();
+  var emailTextFieldController = TextEditingController();
+  var telTextFieldController = TextEditingController();
+  var jobTextFieldValue = "";
+  var passwordTextFieldController = TextEditingController();
+  var photoTextFieldController = TextEditingController();
+  var hashedPassword = "";
+  var firstPassword = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,6 +141,7 @@ class _RegistrerState extends State<Registrer> {
               child: ListView(
                 children: [
                   Form(
+                    key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -135,6 +151,14 @@ class _RegistrerState extends State<Registrer> {
                             children: [
                               Expanded(
                                 child: TextFormField(
+                                  controller: lastnameTextFieldController,
+                                  validator: (value) {
+                                    // ignore: unrelated_type_equality_checks
+                                    if (value == null || value.isEmpty) {
+                                      return 'Ce champs doit etre renseigné';
+                                    }
+                                    return null;
+                                  },
                                   cursorColor: myPrimaryColor,
                                   decoration: InputDecoration(
                                     hintText: "Prénom",
@@ -154,6 +178,14 @@ class _RegistrerState extends State<Registrer> {
                               ),
                               Expanded(
                                 child: TextFormField(
+                                  controller: firstnameTextFieldController,
+                                  validator: (value) {
+                                    // ignore: unrelated_type_equality_checks
+                                    if (value == null || value.isEmpty) {
+                                      return 'Ce champs doit etre renseigné';
+                                    }
+                                    return null;
+                                  },
                                   cursorColor: myPrimaryColor,
                                   decoration: InputDecoration(
                                     hintText: "Nom",
@@ -174,6 +206,17 @@ class _RegistrerState extends State<Registrer> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: TextFormField(
+                            controller: emailTextFieldController,
+                            validator: (value) {
+                              // ignore: unrelated_type_equality_checks
+                              if (value == null || value.isEmpty) {
+                                return 'Ce champs doit etre renseigné';
+                              }
+                              if (!EmailValidator.validate(value)) {
+                                return 'Format d\'email incorrect';
+                              }
+                              return null;
+                            },
                             cursorColor: myPrimaryColor,
                             decoration: InputDecoration(
                               hintText: "Adresse e-mail",
@@ -191,37 +234,70 @@ class _RegistrerState extends State<Registrer> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: IntlPhoneField(
+                            controller: telTextFieldController,
+                            validator: (value) {
+                              // ignore: unrelated_type_equality_checks
+                              if (value == null) {
+                                return 'Ce champs doit etre renseigné';
+                              }
+                              return null;
+                            },
                             decoration: const InputDecoration(
                               labelText: 'Numero de telephone',
                               border: UnderlineInputBorder(
                                 borderSide: BorderSide(),
                               ),
                             ),
-                            initialCountryCode: 'IN',
+                            initialCountryCode: 'CI',
                             onChanged: (phone) {},
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: CustomSingleSelectField<String>(
+                            validator: (value) {
+                              // ignore: unrelated_type_equality_checks
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  jobTextFieldValue ==
+                                      "--selectionnez un métier--") {
+                                return 'Ce champs doit etre renseigné';
+                              }
+                              return null;
+                            },
                             selectedItemColor: myPrimaryColor,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               border: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                color: Colors.black,
+                                color: jobTextFieldValue ==
+                                        "--selectionnez un métier--"
+                                    ? Colors.red
+                                    : Colors.black,
                               )),
-                              suffix: Icon(Icons.unfold_more),
+                              suffix: const Icon(Icons.unfold_more),
                             ),
                             items: jobsList,
                             title: "Metier",
                             initialValue: jobsList[0],
-                            onSelectionDone: (value) {},
+                            onSelectionDone: (value) {
+                              setState(() {
+                                jobTextFieldValue = value.toString();
+                              });
+                            },
                             itemAsString: (item) => item,
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: TextFormField(
+                            controller: firstPassword,
+                            validator: (value) {
+                              // ignore: unrelated_type_equality_checks
+                              if (value == null || value.isEmpty) {
+                                return 'Ce champs doit etre renseigné';
+                              }
+                              return null;
+                            },
                             obscureText: isPasswordVisible,
                             cursorColor: myPrimaryColor,
                             decoration: InputDecoration(
@@ -252,6 +328,18 @@ class _RegistrerState extends State<Registrer> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: TextFormField(
+                            controller: passwordTextFieldController,
+                            validator: (value) {
+                              // ignore: unrelated_type_equality_checks
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  // ignore: unrelated_type_equality_checks
+                                  passwordTextFieldController.value !=
+                                      firstPassword.value) {
+                                return 'Les mots de passe ne correspondent pas';
+                              }
+                              return null;
+                            },
                             obscureText: isPasswordVisible,
                             cursorColor: myPrimaryColor,
                             decoration: InputDecoration(
@@ -339,7 +427,63 @@ class _RegistrerState extends State<Registrer> {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: null,
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              var client = http.Client();
+                              try {
+                                var response = await client.get(
+                                  Uri.http(
+                                    '100.27.5.64:8000',
+                                    'workers/add',
+                                    {
+                                      'firstname':
+                                          firstnameTextFieldController.value,
+                                      'lastname':
+                                          lastnameTextFieldController.value,
+                                      'job': jobTextFieldValue,
+                                      'hashed_password': hashedPassword,
+                                      'tel': telTextFieldController.value,
+                                      'profil_photo':
+                                          "photoNameFieldController.value",
+                                      'email': emailTextFieldController.value,
+                                    },
+                                  ),
+                                );
+
+                                var decodedResponse =
+                                    jsonDecode(utf8.decode(response.bodyBytes))
+                                        as Map;
+                                var uri =
+                                    Uri.parse(decodedResponse['uri'] as String);
+                                if ((await client.get(uri)) as String !=
+                                    "new worker added successfully!") {
+                                  // ignore: use_build_context_synchronously
+                                  Fluttertoast.showToast(
+                                      msg: "An error occured",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.CENTER,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Enrégistré avec succes",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.CENTER,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+                                }
+                              } finally {
+                                client.close();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("An error occured"),
+                                  ),
+                                );
+                              }
+                            }
+                          },
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStatePropertyAll(myPrimaryColor),
