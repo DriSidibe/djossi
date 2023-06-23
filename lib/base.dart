@@ -262,6 +262,19 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
             ],
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          )
+        ],
       ),
       body: Column(
         children: [

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:djossi/my_constants.dart';
@@ -9,7 +8,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'base.dart';
 import 'login_screen.dart';
 import 'my_functions.dart';
 
@@ -431,37 +432,38 @@ class _RegistrerState extends State<Registrer> {
                             if (_formKey.currentState!.validate()) {
                               var client = http.Client();
                               try {
+                                hashedPassword = "";
                                 var response = await client.get(
                                   Uri.http(
                                     '100.27.5.64:8000',
                                     'workers/add',
                                     {
-                                      'firstname':
-                                          firstnameTextFieldController.value,
-                                      'lastname':
-                                          lastnameTextFieldController.value,
-                                      'job': jobTextFieldValue,
-                                      'hashed_password': hashedPassword,
-                                      'tel': telTextFieldController.value,
+                                      'firstname': firstnameTextFieldController
+                                          .value.text
+                                          .toString(),
+                                      'lastname': lastnameTextFieldController
+                                          .value.text
+                                          .toString(),
+                                      'job': jobTextFieldValue.toString(),
+                                      'hashed_password':
+                                          hashedPassword.toString(),
+                                      'tel': telTextFieldController.value.text
+                                          .toString(),
                                       'profil_photo':
                                           "photoNameFieldController.value",
-                                      'email': emailTextFieldController.value,
+                                      'email': emailTextFieldController
+                                          .value.text
+                                          .toString(),
                                     },
                                   ),
                                 );
 
-                                var decodedResponse =
-                                    jsonDecode(utf8.decode(response.bodyBytes))
-                                        as Map;
-                                var uri =
-                                    Uri.parse(decodedResponse['uri'] as String);
-                                if ((await client.get(uri)) as String !=
-                                    "new worker added successfully!") {
+                                if (response.body != "0") {
                                   // ignore: use_build_context_synchronously
                                   Fluttertoast.showToast(
-                                      msg: "An error occured",
+                                      msg: "Une erreur est survenue",
                                       toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.CENTER,
+                                      gravity: ToastGravity.BOTTOM,
                                       timeInSecForIosWeb: 1,
                                       textColor: Colors.white,
                                       fontSize: 16.0);
@@ -469,18 +471,38 @@ class _RegistrerState extends State<Registrer> {
                                   Fluttertoast.showToast(
                                       msg: "Enrégistré avec succes",
                                       toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.CENTER,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+                                }
+                              } on Exception catch (_) {
+                                if (_.toString() == "Connection failed") {
+                                  Fluttertoast.showToast(
+                                      msg: "Vous n'ets pas connectz à internet",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
                                       timeInSecForIosWeb: 1,
                                       textColor: Colors.white,
                                       fontSize: 16.0);
                                 }
                               } finally {
                                 client.close();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("An error occured"),
-                                  ),
-                                );
+                                await (await SharedPreferences.getInstance())
+                                    .setBool('connected', true)
+                                    .then(
+                                      (value) => {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const Base(),
+                                          ),
+                                        )
+                                      },
+                                    )
+                                    .onError(
+                                      (error, stackTrace) => exit(0),
+                                    );
                               }
                             }
                           },
