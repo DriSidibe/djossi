@@ -87,6 +87,14 @@ class _RegistrerState extends State<Registrer> {
     );
   }
 
+  Future<bool> isEmailAlreadyExist(email) async {
+    return isEmailOrTelAlreadyExist(email);
+  }
+
+  Future<bool> isTelAlreadyExist(tel) {
+    return isEmailOrTelAlreadyExist(tel);
+  }
+
   var firstnameTextFieldController = TextEditingController();
   var lastnameTextFieldController = TextEditingController();
   var emailTextFieldController = TextEditingController();
@@ -216,6 +224,7 @@ class _RegistrerState extends State<Registrer> {
                               if (!EmailValidator.validate(value)) {
                                 return 'Format d\'email incorrect';
                               }
+
                               return null;
                             },
                             cursorColor: myPrimaryColor,
@@ -432,44 +441,76 @@ class _RegistrerState extends State<Registrer> {
                             if (_formKey.currentState!.validate()) {
                               var client = http.Client();
                               try {
-                                hashedPassword = "";
-                                var response = await client.get(
-                                  Uri.http(
-                                    '100.27.5.64:8000',
-                                    'workers/add',
-                                    {
-                                      'firstname': firstnameTextFieldController
-                                          .value.text
-                                          .toString(),
-                                      'lastname': lastnameTextFieldController
-                                          .value.text
-                                          .toString(),
-                                      'job': jobTextFieldValue.toString(),
-                                      'hashed_password':
-                                          hashedPassword.toString(),
-                                      'tel': telTextFieldController.value.text
-                                          .toString(),
-                                      'profil_photo':
-                                          "photoNameFieldController.value",
-                                      'email': emailTextFieldController
-                                          .value.text
-                                          .toString(),
-                                    },
-                                  ),
-                                );
-
-                                if (response.body != "0") {
-                                  // ignore: use_build_context_synchronously
-                                  Fluttertoast.showToast(
-                                      msg: "Une erreur est survenue",
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.BOTTOM,
-                                      timeInSecForIosWeb: 1,
-                                      textColor: Colors.white,
-                                      fontSize: 16.0);
+                                if (!await isEmailAlreadyExist(
+                                        emailTextFieldController.value.text) &&
+                                    !await isTelAlreadyExist(
+                                        telTextFieldController.value.text)) {
+                                  var response = await client.get(
+                                    Uri.http(
+                                      '192.168.1.191:8000',
+                                      'workers/add',
+                                      {
+                                        'firstname':
+                                            firstnameTextFieldController
+                                                .value.text
+                                                .toString(),
+                                        'lastname': lastnameTextFieldController
+                                            .value.text
+                                            .toString(),
+                                        'job': jobTextFieldValue.toString(),
+                                        'hashed_password':
+                                            passwordTextFieldController
+                                                .value.text
+                                                .toString(),
+                                        'tel': telTextFieldController.value.text
+                                            .toString(),
+                                        'profil_photo':
+                                            "photoNameFieldController.value",
+                                        'email': emailTextFieldController
+                                            .value.text
+                                            .toString(),
+                                      },
+                                    ),
+                                  );
+                                  if (response.body != "0") {
+                                    // ignore: use_build_context_synchronously
+                                    Fluttertoast.showToast(
+                                        msg: "Une erreur est survenue",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 1,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg: "Enrégistré avec succes",
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.BOTTOM,
+                                        timeInSecForIosWeb: 1,
+                                        textColor: Colors.white,
+                                        fontSize: 16.0);
+                                    await (await SharedPreferences
+                                            .getInstance())
+                                        .setBool('connected', true)
+                                        .then(
+                                          (value) => {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const Base(),
+                                              ),
+                                            )
+                                          },
+                                        )
+                                        .onError(
+                                          (error, stackTrace) => exit(0),
+                                        );
+                                  }
                                 } else {
                                   Fluttertoast.showToast(
-                                      msg: "Enrégistré avec succes",
+                                      msg:
+                                          "Le numéro de téléphone ou l'email existe deja dans la base de donnés",
                                       toastLength: Toast.LENGTH_SHORT,
                                       gravity: ToastGravity.BOTTOM,
                                       timeInSecForIosWeb: 1,
@@ -488,21 +529,6 @@ class _RegistrerState extends State<Registrer> {
                                 }
                               } finally {
                                 client.close();
-                                await (await SharedPreferences.getInstance())
-                                    .setBool('connected', true)
-                                    .then(
-                                      (value) => {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const Base(),
-                                          ),
-                                        )
-                                      },
-                                    )
-                                    .onError(
-                                      (error, stackTrace) => exit(0),
-                                    );
                               }
                             }
                           },

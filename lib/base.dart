@@ -1,6 +1,9 @@
 import 'package:djossi/available_workers_list.dart';
+import 'package:djossi/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
 import 'my_functions.dart';
@@ -36,14 +39,9 @@ class BottomNavigationBarExample extends StatefulWidget {
 class _BottomNavigationBarExampleState
     extends State<BottomNavigationBarExample> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     AcceuilScreen(),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
+    ProfilScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -315,6 +313,215 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProfilScreen extends StatefulWidget {
+  const ProfilScreen({super.key});
+
+  @override
+  State<ProfilScreen> createState() => _ProfilScreenState();
+}
+
+class _ProfilScreenState extends State<ProfilScreen> {
+  final _random = Random();
+
+  Container settingSectionRow(icon, title, callbackAction) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: const Color.fromARGB(255, 222, 222, 222),
+          )),
+      child: GestureDetector(
+        onTap: callbackAction,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 10.0, bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              colorsList[_random.nextInt(colorsList.length)]),
+                      child: Icon(
+                        icon,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Text(title),
+                    ),
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(right: 10.0),
+                child: Icon(Icons.arrow_forward),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Column settingSection(title, List<Container> settingSectionRowList) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Text(
+            title,
+            style: getFontStyleFromMediaSize(
+              context,
+              384,
+              640,
+              const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+              TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: myTextBigFontSize,
+              ),
+            ),
+          ),
+        ),
+        Column(
+          children: settingSectionRowList,
+        )
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 10.0),
+            child: Icon(
+              Icons.edit,
+            ),
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: myPrimaryColor),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: Text(
+                            "name",
+                            style: getFontStyleFromMediaSize(
+                              context,
+                              384,
+                              640,
+                              const TextStyle(
+                                color: Colors.white,
+                              ),
+                              const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "email",
+                          style: getFontStyleFromMediaSize(
+                            context,
+                            384,
+                            640,
+                            const TextStyle(
+                              color: Colors.white,
+                            ),
+                            const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 222, 222, 222),
+            ),
+            child: Column(
+              children: [
+                settingSection("Gérer mes paramètres de compte", [
+                  settingSectionRow(
+                      Icons.phone_android, "Vérifier votre mobile", () {}),
+                  settingSectionRow(Icons.email, "Vérifier votre email", () {}),
+                  settingSectionRow(
+                      Icons.contact_emergency, "Gérer mon profil", () {}),
+                  settingSectionRow(
+                      Icons.key, "Changer mon mot de passe", () {}),
+                  settingSectionRow(Icons.language, "Changer de langue", () {}),
+                ]),
+                settingSection("Déconnexion", [
+                  settingSectionRow(
+                      FluentIcons.power_20_filled, "Se déconnecter", () async {
+                    await (await SharedPreferences.getInstance())
+                        .setBool('connected', false)
+                        .then(
+                          (value) => {
+                            Fluttertoast.showToast(
+                              msg: "Vous etes déconnecté avec succes",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            ),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Login(),
+                              ),
+                            ),
+                          },
+                        );
+                  }),
+                ])
+              ],
+            ),
+          )
         ],
       ),
     );

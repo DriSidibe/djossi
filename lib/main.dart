@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:djossi/base.dart';
 import 'package:djossi/login_screen.dart';
 import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
@@ -8,27 +7,23 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_indicator/carousel_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'base.dart';
 import 'my_functions.dart';
 import 'package:djossi/my_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final bool? isConnected = prefs.getBool('connected');
-  if (isConnected != null) {
-    if (isConnected) {
+  final bool? isConneted = prefs.getBool('connected');
+  if (isConneted != null) {
+    if (isConneted) {
       runApp(const Base());
     } else {
       runApp(const MyApp());
     }
   } else {
-    runApp(
-      const MyApp(),
-    );
+    runApp(const MyApp());
   }
-  runApp(
-    const MyApp(),
-  );
 }
 
 class WelcomeScreenSliders {

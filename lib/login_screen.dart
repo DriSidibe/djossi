@@ -15,6 +15,19 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool isPasswordVisible = true;
 
+  Map<String, Map> getUserByEmailOrTel() {
+    return {};
+  }
+
+  void logUser() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const Base(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,14 +157,7 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                         ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Base(),
-                              ),
-                            );
-                          },
+                          onPressed: logUser,
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStatePropertyAll(myPrimaryColor),
