@@ -20,8 +20,6 @@ class _LoginState extends State<Login> {
   }
 
   void logUser() {
-    getWorkerBy("0556884867");
-
     Navigator.push(
       context,
       MaterialPageRoute(

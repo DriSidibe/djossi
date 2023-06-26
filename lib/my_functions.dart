@@ -29,16 +29,16 @@ Future<Worker> getWorkerBy(value) async {
         "workers/by/teloremail/$value/",
       ),
     );
-    debugPrint(json.decode(response.body)["firstname"]);
+    Map<String, dynamic> responseToMap = json.decode(response.body)[0];
     if (response.body.isNotEmpty) {
       return Worker(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
+        responseToMap["firstname"]!,
+        responseToMap["lastname"]!,
+        responseToMap["email"]!,
+        responseToMap["job"]!,
+        responseToMap["tel"]!,
+        responseToMap["profil_photo"]!,
+        responseToMap["hashed_password"]!,
       );
     } else {
       return Worker(
