@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,16 +29,16 @@ Future<Worker> getWorkerBy(value) async {
         "workers/by/teloremail/$value/",
       ),
     );
-    Map<String, String> responseToMap = response.body[0] as Map<String, String>;
+    debugPrint(json.decode(response.body)["firstname"]);
     if (response.body.isNotEmpty) {
       return Worker(
-        responseToMap["firstname"]!,
-        responseToMap["lastname"]!,
-        responseToMap["email"]!,
-        responseToMap["job"]!,
-        responseToMap["tel"]!,
-        responseToMap["profil_photo"]!,
-        responseToMap["hashed_password"]!,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
       );
     } else {
       return Worker(
@@ -49,14 +51,24 @@ Future<Worker> getWorkerBy(value) async {
         "",
       );
     }
-  } finally {
+  } catch (_) {
     Fluttertoast.showToast(
-        msg: "Une erreur est survenue",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        textColor: Colors.white,
-        fontSize: 16.0);
+      msg: "Une erreur est survenue",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+    return Worker(
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    );
   }
 }
 
