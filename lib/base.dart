@@ -3,9 +3,11 @@ import 'package:djossi/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
+import 'my_classes.dart';
 import 'my_functions.dart';
 import 'package:djossi/my_constants.dart';
 
@@ -408,121 +410,135 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 10.0),
-            child: Icon(
-              Icons.edit,
-            ),
-          ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          Container(
-            decoration: BoxDecoration(color: myPrimaryColor),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
-              child: Row(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30.0),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: Text(
-                            "name",
-                            style: getFontStyleFromMediaSize(
-                              context,
-                              384,
-                              640,
-                              const TextStyle(
-                                color: Colors.white,
-                              ),
-                              const TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "email",
-                          style: getFontStyleFromMediaSize(
-                            context,
-                            384,
-                            640,
-                            const TextStyle(
-                              color: Colors.white,
-                            ),
-                            const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+    return ChangeNotifierProvider<GlobalStateModel>(
+      create: (_) => GlobalStateModel(),
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 10.0),
+              child: Icon(
+                Icons.edit,
               ),
             ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 222, 222, 222),
-            ),
-            child: Column(
-              children: [
-                settingSection("Gérer mes paramètres de compte", [
-                  settingSectionRow(
-                      Icons.phone_android, "Vérifier votre mobile", () {}),
-                  settingSectionRow(Icons.email, "Vérifier votre email", () {}),
-                  settingSectionRow(
-                      Icons.contact_emergency, "Gérer mon profil", () {}),
-                  settingSectionRow(
-                      Icons.key, "Changer mon mot de passe", () {}),
-                  settingSectionRow(Icons.language, "Changer de langue", () {}),
-                ]),
-                settingSection("Déconnexion", [
-                  settingSectionRow(
-                      FluentIcons.power_20_filled, "Se déconnecter", () async {
-                    await (await SharedPreferences.getInstance())
-                        .setBool('connected', false)
-                        .then(
-                          (value) => {
-                            Fluttertoast.showToast(
-                              msg: "Vous etes déconnecté avec succes",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              textColor: Colors.white,
-                              fontSize: 16.0,
+          ],
+        ),
+        body: ListView(
+          children: [
+            Container(
+              decoration: BoxDecoration(color: myPrimaryColor),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 20.0),
+                            child: Consumer<GlobalStateModel>(
+                              builder: (context, model, child) {
+                                return Text(
+                                  "${model.currentWorker.firstname} ${model.currentWorker.lastname}",
+                                  style: getFontStyleFromMediaSize(
+                                    context,
+                                    384,
+                                    640,
+                                    const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                    const TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Login(),
+                          ),
+                          Consumer<GlobalStateModel>(
+                            builder: (context, model, child) {
+                              return Text(
+                                model.currentWorker.toString(),
+                                style: getFontStyleFromMediaSize(
+                                  context,
+                                  384,
+                                  640,
+                                  const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 222, 222, 222),
+              ),
+              child: Column(
+                children: [
+                  settingSection("Gérer mes paramètres de compte", [
+                    settingSectionRow(
+                        Icons.phone_android, "Vérifier votre mobile", () {}),
+                    settingSectionRow(
+                        Icons.email, "Vérifier votre email", () {}),
+                    settingSectionRow(
+                        Icons.contact_emergency, "Gérer mon profil", () {}),
+                    settingSectionRow(
+                        Icons.key, "Changer mon mot de passe", () {}),
+                    settingSectionRow(
+                        Icons.language, "Changer de langue", () {}),
+                  ]),
+                  settingSection("Déconnexion", [
+                    settingSectionRow(
+                        FluentIcons.power_20_filled, "Se déconnecter",
+                        () async {
+                      await (await SharedPreferences.getInstance())
+                          .setBool('connected', false)
+                          .then(
+                            (value) => {
+                              Fluttertoast.showToast(
+                                msg: "Vous etes déconnecté avec succes",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                timeInSecForIosWeb: 1,
+                                textColor: Colors.white,
+                                fontSize: 16.0,
                               ),
-                            ),
-                          },
-                        );
-                  }),
-                ])
-              ],
-            ),
-          )
-        ],
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Login(),
+                                ),
+                              ),
+                            },
+                          );
+                    }),
+                  ])
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

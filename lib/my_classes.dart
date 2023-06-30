@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
+
 class Worker {
+  final int id;
   final String firstname;
   final String lastname;
   final String email;
@@ -7,39 +10,31 @@ class Worker {
   final String profilPhoto;
   final String hashedPassword;
 
-  Worker(this.firstname, this.lastname, this.email, this.job, this.tel,
+  Worker(this.id, this.firstname, this.lastname, this.email, this.job, this.tel,
       this.profilPhoto, this.hashedPassword);
-
-  String get getFirstname {
-    return firstname;
-  }
-
-  String get getLastname {
-    return lastname;
-  }
-
-  String get getEmail {
-    return email;
-  }
-
-  String get getJob {
-    return job;
-  }
-
-  String get getTel {
-    return tel;
-  }
-
-  String get getProfilPhoto {
-    return profilPhoto;
-  }
-
-  String get getHashedPassword {
-    return hashedPassword;
-  }
 
   @override
   String toString() {
     return ("{$firstname, $lastname, $email, $job, $tel, $profilPhoto, $hashedPassword}");
+  }
+}
+
+class GlobalStateModel extends ChangeNotifier {
+  Worker _currentWorker = Worker(
+    0,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  );
+
+  Worker get currentWorker => _currentWorker;
+
+  set currentWorker(Worker newWorker) {
+    _currentWorker = newWorker;
+    notifyListeners();
   }
 }

@@ -32,6 +32,7 @@ Future<Worker> getWorkerBy(value) async {
     Map<String, dynamic> responseToMap = json.decode(response.body)[0];
     if (response.body.isNotEmpty) {
       return Worker(
+        responseToMap["id"]!,
         responseToMap["firstname"]!,
         responseToMap["lastname"]!,
         responseToMap["email"]!,
@@ -42,6 +43,7 @@ Future<Worker> getWorkerBy(value) async {
       );
     }
     return Worker(
+      0,
       "",
       "",
       "",
@@ -52,6 +54,7 @@ Future<Worker> getWorkerBy(value) async {
     );
   } catch (_) {
     return Worker(
+      0,
       "",
       "",
       "",
