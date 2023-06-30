@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:djossi/my_classes.dart';
 import 'package:djossi/my_constants.dart';
 import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'base.dart';
 import 'my_functions.dart';
@@ -14,18 +18,107 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool isPasswordVisible = true;
+  var telOrEmailController = TextEditingController();
+  var passwordController = TextEditingController();
+  dynamic telOrEmailValidationMsg = "";
+  dynamic passwordValidationMsg;
 
-  Map<String, Map> getUserByEmailOrTel() {
-    return {};
+  late Worker currentWorker;
+  final _formKey = GlobalKey<FormState>();
+
+  Future<bool> isAllOk(telOrEmail, password) async {
+    if (await isTelOrEmailOk(telOrEmail) &&
+        await isPasswordOk(telOrEmail, password)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  void logUser() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const Base(),
-      ),
+  Future<bool> isPasswordOk(telOrEmail, password) async {
+    if (await isTelOrEmailOk(telOrEmail)) {
+      if (currentWorker.hashedPassword == password) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> isTelOrEmailOk(telOrEmail) async => getWorkerBy(telOrEmail).then(
+        (value) {
+          setState(
+            () {
+              currentWorker = value;
+            },
+          );
+          if (value.firstname != "") {
+            return true;
+          }
+
+          return false;
+        },
+      ).onError(
+        (error, stackTrace) {
+          return false;
+        },
+      );
+
+  Future<void> logUser(telOrEmail, password) async {
+    isAllOk(telOrEmail, password).then(
+      (value) {
+        if (value) {
+          Fluttertoast.showToast(
+            msg: "Vous etes connecté avec succes",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Base(),
+            ),
+          );
+        }
+      },
     );
+  }
+
+  void telOrEmailValidation() async {
+    if (await isTelOrEmailOk(telOrEmailController.value.text)) {
+      setState(() {
+        telOrEmailValidationMsg = null;
+        passwordValidationMsg = "Mot de passe incorrect";
+      });
+    } else {
+      setState(() {
+        telOrEmailValidationMsg = "cet identifiant n'existe pas";
+      });
+    }
+  }
+
+  void passwordValidation() async {
+    if (await isTelOrEmailOk(telOrEmailController.value.text)) {
+      if (await isPasswordOk(
+          telOrEmailController.value.text, passwordController.value.text)) {
+        setState(() {
+          passwordValidationMsg = null;
+        });
+      } else {
+        setState(() {
+          passwordValidationMsg = "Mot de passe incorrect";
+        });
+      }
+    } else {
+      setState(() {
+        passwordValidationMsg = null;
+      });
+    }
   }
 
   @override
@@ -71,11 +164,17 @@ class _LoginState extends State<Login> {
               child: ListView(
                 children: [
                   Form(
+                    key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         TextFormField(
+                          controller: telOrEmailController,
+                          onChanged: (value) {
+                            telOrEmailValidation();
+                          },
+                          validator: (value) => telOrEmailValidationMsg,
                           cursorColor: myPrimaryColor,
                           decoration: InputDecoration(
                             hintText: "Numero de telephone ou adresse e-mail",
@@ -118,6 +217,11 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                         TextFormField(
+                          controller: passwordController,
+                          validator: (value) => passwordValidationMsg,
+                          onChanged: (value) {
+                            passwordValidation();
+                          },
                           obscureText: isPasswordVisible,
                           cursorColor: myPrimaryColor,
                           decoration: InputDecoration(
@@ -157,7 +261,12 @@ class _LoginState extends State<Login> {
                           ],
                         ),
                         ElevatedButton(
-                          onPressed: logUser,
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              logUser(telOrEmailController.value.text,
+                                  passwordController.value.text);
+                            }
+                          },
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStatePropertyAll(myPrimaryColor),

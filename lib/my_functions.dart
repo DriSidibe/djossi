@@ -40,26 +40,17 @@ Future<Worker> getWorkerBy(value) async {
         responseToMap["profil_photo"]!,
         responseToMap["hashed_password"]!,
       );
-    } else {
-      return Worker(
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      );
     }
-  } catch (_) {
-    Fluttertoast.showToast(
-      msg: "Une erreur est survenue",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      textColor: Colors.white,
-      fontSize: 16.0,
+    return Worker(
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
     );
+  } catch (_) {
     return Worker(
       "",
       "",
