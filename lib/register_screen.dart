@@ -493,19 +493,37 @@ class _RegistrerState extends State<Registrer> {
                                             .getInstance())
                                         .setBool('connected', true)
                                         .then(
-                                          (value) => {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const Base(),
-                                              ),
-                                            )
+                                      (value) async {
+                                        dynamic id;
+                                        getWorkerBy(emailTextFieldController
+                                                .value.text)
+                                            .then(
+                                          (value) async {
+                                            id = value.id;
+                                            (await SharedPreferences
+                                                    .getInstance())
+                                                .setInt('currentWorkerId', id)
+                                                .then(
+                                                  (value) => {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const Base(),
+                                                      ),
+                                                    )
+                                                  },
+                                                );
                                           },
-                                        )
-                                        .onError(
-                                          (error, stackTrace) => exit(0),
+                                        ).onError(
+                                          (error, stackTrace) {
+                                            exit(1);
+                                          },
                                         );
+                                      },
+                                    ).onError(
+                                      (error, stackTrace) => exit(0),
+                                    );
                                   }
                                 } else {
                                   Fluttertoast.showToast(

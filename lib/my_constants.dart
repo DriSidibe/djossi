@@ -24,3 +24,7 @@ List<Color> colorsList = [
   Colors.pink,
   const Color.fromARGB(255, 76, 49, 81),
 ];
+
+//DB settings
+String dbServerName = "192.168.1.191";
+String dbServerPort = "8000";

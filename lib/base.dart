@@ -467,11 +467,12 @@ class _ProfilScreenState extends State<ProfilScreen> {
                         Padding(
                           padding: const EdgeInsets.only(left: 30.0),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 20.0),
                                 child: Text(
-                                  fullName,
+                                  fullName.toUpperCase(),
                                   style: getFontStyleFromMediaSize(
                                     context,
                                     384,
@@ -479,8 +480,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                     const TextStyle(
                                       color: Colors.white,
                                     ),
-                                    const TextStyle(
+                                    TextStyle(
                                       color: Colors.white,
+                                      fontSize: myTextBigFontSize,
                                     ),
                                   ),
                                 ),
@@ -494,8 +496,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                   const TextStyle(
                                     color: Colors.white,
                                   ),
-                                  const TextStyle(
+                                  TextStyle(
                                     color: Colors.white,
+                                    fontSize: myTextMediumFontSize,
                                   ),
                                 ),
                               ),

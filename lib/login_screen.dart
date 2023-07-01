@@ -277,24 +277,33 @@ class _LoginState extends State<Login> {
                                   isAllOk(telOrEmailController.value.text,
                                           passwordController.value.text)
                                       .then(
-                                    (value) {
+                                    (value) async {
                                       if (value) {
                                         model.currentWorker = currentWorker;
                                         prefs.setInt('currentWorkerId',
                                             currentWorker.id);
-                                        Fluttertoast.showToast(
-                                          msg: "Vous etes connecté avec succes",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.BOTTOM,
-                                          timeInSecForIosWeb: 1,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0,
-                                        );
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const Base(),
-                                          ),
+                                        (await SharedPreferences.getInstance())
+                                            .setBool('connected', true)
+                                            .then(
+                                          (value) {
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  "Vous etes connecté avec succes",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0,
+                                            );
+
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const Base(),
+                                              ),
+                                            );
+                                          },
                                         );
                                       }
                                     },

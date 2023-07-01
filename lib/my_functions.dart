@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:djossi/my_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,7 +26,7 @@ Future<Worker> getWorkerBy(value) async {
   try {
     var response = await client.get(
       Uri.http(
-        '192.168.1.191:8000',
+        "$dbServerName:$dbServerPort",
         value.toString().length <= 10
             ? "workers/by/id/$value/"
             : "workers/by/teloremail/$value/",
@@ -73,7 +74,7 @@ Future<bool> isEmailOrTelAlreadyExist(value) async {
   try {
     var response = await client.get(
       Uri.http(
-        '192.168.1.191:8000',
+        "$dbServerName:$dbServerPort",
         "workers/by/teloremail/$value/",
       ),
     );
