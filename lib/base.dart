@@ -331,6 +331,14 @@ class ProfilScreen extends StatefulWidget {
 class _ProfilScreenState extends State<ProfilScreen> {
   final _random = Random();
 
+  Future<Worker> getCurrentWorker() async {
+    return getWorkerBy(
+      (await SharedPreferences.getInstance())
+          .getInt('currentWorkerId')
+          .toString(),
+    );
+  }
+
   Container settingSectionRow(icon, title, callbackAction) {
     return Container(
       decoration: BoxDecoration(
@@ -412,44 +420,58 @@ class _ProfilScreenState extends State<ProfilScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GlobalStateModel>(
       create: (_) => GlobalStateModel(),
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          actions: const [
-            Padding(
-              padding: EdgeInsets.only(right: 10.0),
-              child: Icon(
-                Icons.edit,
-              ),
+      child: FutureBuilder(
+        future: getCurrentWorker(),
+        builder: (context, snapshot) {
+          String fullName = "";
+          String email = "";
+          if (snapshot.hasData) {
+            fullName = "${snapshot.data?.lastname} ${snapshot.data?.firstname}";
+            email = "${snapshot.data?.email}";
+          } else if (snapshot.hasError) {
+            fullName = "error";
+            email = "error";
+          } else {
+            fullName = "";
+            email = "";
+          }
+          return Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              actions: const [
+                Padding(
+                  padding: EdgeInsets.only(right: 10.0),
+                  child: Icon(
+                    Icons.edit,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        body: ListView(
-          children: [
-            Container(
-              decoration: BoxDecoration(color: myPrimaryColor),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30.0),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 20.0),
-                            child: Consumer<GlobalStateModel>(
-                              builder: (context, model, child) {
-                                return Text(
-                                  "${model.currentWorker.firstname} ${model.currentWorker.lastname}",
+            body: ListView(
+              children: [
+                Container(
+                  decoration: BoxDecoration(color: myPrimaryColor),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 30.0),
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 20.0),
+                                child: Text(
+                                  fullName,
                                   style: getFontStyleFromMediaSize(
                                     context,
                                     384,
@@ -461,14 +483,10 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                          Consumer<GlobalStateModel>(
-                            builder: (context, model, child) {
-                              return Text(
-                                model.currentWorker.toString(),
+                                ),
+                              ),
+                              Text(
+                                email,
                                 style: getFontStyleFromMediaSize(
                                   context,
                                   384,
@@ -480,65 +498,65 @@ class _ProfilScreenState extends State<ProfilScreen> {
                                     color: Colors.white,
                                   ),
                                 ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    )
-                  ],
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 222, 222, 222),
+                  ),
+                  child: Column(
+                    children: [
+                      settingSection("Gérer mes paramètres de compte", [
+                        settingSectionRow(Icons.phone_android,
+                            "Vérifier votre mobile", () {}),
+                        settingSectionRow(
+                            Icons.email, "Vérifier votre email", () {}),
+                        settingSectionRow(
+                            Icons.contact_emergency, "Gérer mon profil", () {}),
+                        settingSectionRow(
+                            Icons.key, "Changer mon mot de passe", () {}),
+                        settingSectionRow(
+                            Icons.language, "Changer de langue", () {}),
+                      ]),
+                      settingSection("Déconnexion", [
+                        settingSectionRow(
+                            FluentIcons.power_20_filled, "Se déconnecter",
+                            () async {
+                          await (await SharedPreferences.getInstance())
+                              .setBool('connected', false)
+                              .then(
+                                (value) => {
+                                  Fluttertoast.showToast(
+                                    msg: "Vous etes déconnecté avec succes",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  ),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const Login(),
+                                    ),
+                                  ),
+                                },
+                              );
+                        }),
+                      ])
+                    ],
+                  ),
+                )
+              ],
             ),
-            Container(
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 222, 222, 222),
-              ),
-              child: Column(
-                children: [
-                  settingSection("Gérer mes paramètres de compte", [
-                    settingSectionRow(
-                        Icons.phone_android, "Vérifier votre mobile", () {}),
-                    settingSectionRow(
-                        Icons.email, "Vérifier votre email", () {}),
-                    settingSectionRow(
-                        Icons.contact_emergency, "Gérer mon profil", () {}),
-                    settingSectionRow(
-                        Icons.key, "Changer mon mot de passe", () {}),
-                    settingSectionRow(
-                        Icons.language, "Changer de langue", () {}),
-                  ]),
-                  settingSection("Déconnexion", [
-                    settingSectionRow(
-                        FluentIcons.power_20_filled, "Se déconnecter",
-                        () async {
-                      await (await SharedPreferences.getInstance())
-                          .setBool('connected', false)
-                          .then(
-                            (value) => {
-                              Fluttertoast.showToast(
-                                msg: "Vous etes déconnecté avec succes",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                                timeInSecForIosWeb: 1,
-                                textColor: Colors.white,
-                                fontSize: 16.0,
-                              ),
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const Login(),
-                                ),
-                              ),
-                            },
-                          );
-                    }),
-                  ])
-                ],
-              ),
-            )
-          ],
-        ),
+          );
+        },
       ),
     );
   }

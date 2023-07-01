@@ -271,6 +271,8 @@ class _LoginState extends State<Login> {
                           Consumer<GlobalStateModel>(
                             builder: (context, model, child) => ElevatedButton(
                               onPressed: () async {
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
                                 if (_formKey.currentState!.validate()) {
                                   isAllOk(telOrEmailController.value.text,
                                           passwordController.value.text)
@@ -278,7 +280,8 @@ class _LoginState extends State<Login> {
                                     (value) {
                                       if (value) {
                                         model.currentWorker = currentWorker;
-
+                                        prefs.setInt('currentWorkerId',
+                                            currentWorker.id);
                                         Fluttertoast.showToast(
                                           msg: "Vous etes connecté avec succes",
                                           toastLength: Toast.LENGTH_SHORT,

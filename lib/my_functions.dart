@@ -26,7 +26,9 @@ Future<Worker> getWorkerBy(value) async {
     var response = await client.get(
       Uri.http(
         '192.168.1.191:8000',
-        "workers/by/teloremail/$value/",
+        value.toString().length <= 10
+            ? "workers/by/id/$value/"
+            : "workers/by/teloremail/$value/",
       ),
     );
     Map<String, dynamic> responseToMap = json.decode(response.body)[0];
