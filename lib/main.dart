@@ -1,29 +1,33 @@
 import 'dart:math';
 
-import 'package:djossi/login_screen.dart';
-import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_indicator/carousel_indicator.dart';
+import 'package:go_router/go_router.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'base.dart';
+import 'my_classes.dart';
 import 'my_functions.dart';
 import 'package:djossi/my_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final bool? isConneted = prefs.getBool('connected');
-  if (isConneted != null) {
-    if (isConneted) {
-      runApp(const Base());
-    } else {
-      runApp(const MyApp());
-    }
-  } else {
-    runApp(const MyApp());
-  }
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<GlobalStateModel>(
+        create: (_) => GlobalStateModel(),
+      ),
+      StreamProvider<InternetConnectionStatus>(
+        initialData: InternetConnectionStatus.connected,
+        create: (_) {
+          return InternetConnectionChecker().onStatusChange;
+        },
+      ),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class WelcomeScreenSliders {
@@ -104,320 +108,361 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   late bool isBottomListViewOpen = false;
 
   final _random = Random();
+  Future<bool> getConnexionStatus() async {
+    return await InternetConnectionChecker().hasConnection;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          titleSpacing: 0,
-          leading: Center(
-            child: Icon(
-              Icons.contact_emergency,
-              color: myPrimaryColor,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            titleSpacing: 0,
+            leading: Center(
+              child: Icon(
+                Icons.contact_emergency,
+                color: myPrimaryColor,
+              ),
             ),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "DJOSSI",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black),
-              ),
-              Text(
-                "App",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            Row(
+            title: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: PopupMenuButton(
-                    onSelected: _select,
-                    padding: EdgeInsets.zero,
-                    // initialValue: choices[_selection],
-                    itemBuilder: (BuildContext context) {
-                      return languageList.values.map(
-                        (value) {
-                          return PopupMenuItem<String>(
-                            value: languageList.keys.firstWhere(
-                                (k) => languageList[k] == value,
-                                orElse: () => ""),
-                            child: Text(value),
-                          );
-                        },
-                      ).toList();
-                    },
-
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorsList[_random.nextInt(colorsList.length)],
-                      ),
-                      child: Center(
-                        child: Text(
-                          choosenLanguage,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                Text(
+                  "DJOSSI",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.black),
+                ),
+                Text(
+                  "App",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 12,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: PopupMenuButton(
-                    onSelected: _select,
-                    padding: EdgeInsets.zero,
-                    // initialValue: choices[_selection],
-                    itemBuilder: (BuildContext context) {
-                      return deviseList.map(
-                        (String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                          );
-                        },
-                      ).toList();
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: colorsList[_random.nextInt(colorsList.length)],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          choosenDevise,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+              ],
+            ),
+            actions: [
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: PopupMenuButton(
+                      onSelected: _select,
+                      padding: EdgeInsets.zero,
+                      // initialValue: choices[_selection],
+                      itemBuilder: (BuildContext context) {
+                        return languageList.values.map(
+                          (value) {
+                            return PopupMenuItem<String>(
+                              value: languageList.keys.firstWhere(
+                                  (k) => languageList[k] == value,
+                                  orElse: () => ""),
+                              child: Text(value),
+                            );
+                          },
+                        ).toList();
+                      },
+
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorsList[_random.nextInt(colorsList.length)],
+                        ),
+                        child: Center(
+                          child: Text(
+                            choosenLanguage,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                )
-              ],
-            )
-          ],
-          backgroundColor: Colors.white,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Column(
-                children: [
-                  SizedBox(
-                    child: Column(
-                      children: [
-                        CarouselSlider(
-                          options: CarouselOptions(
-                            viewportFraction: 1,
-                            height: MediaQuery.of(context).size.height * 0.5,
-                            initialPage: 0,
-                            onPageChanged: (index, reason) {
-                              setState(() {
-                                welcomeScreenSlidersCurrentIndex = index;
-                              });
-                            },
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: PopupMenuButton(
+                      onSelected: _select,
+                      padding: EdgeInsets.zero,
+                      // initialValue: choices[_selection],
+                      itemBuilder: (BuildContext context) {
+                        return deviseList.map(
+                          (String choice) {
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(choice),
+                            );
+                          },
+                        ).toList();
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colorsList[_random.nextInt(colorsList.length)],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            choosenDevise,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          items: welcomeScreenSliders.map(
-                            (item) {
-                              return Builder(
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal:
-                                          MediaQuery.of(context).size.width *
-                                              (1 / 10),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              4,
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                color: myPrimaryColor),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              )
+            ],
+            backgroundColor: Colors.white,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Column(
+                  children: [
+                    SizedBox(
+                      child: Column(
+                        children: [
+                          CarouselSlider(
+                            options: CarouselOptions(
+                              viewportFraction: 1,
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              initialPage: 0,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  welcomeScreenSlidersCurrentIndex = index;
+                                });
+                              },
+                            ),
+                            items: welcomeScreenSliders.map(
+                              (item) {
+                                return Builder(
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      margin: EdgeInsets.symmetric(
+                                        horizontal:
+                                            MediaQuery.of(context).size.width *
+                                                (1 / 10),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height /
+                                                4,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  color: myPrimaryColor),
+                                            ),
                                           ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 30, bottom: 10),
-                                          child: Text(
-                                            item.title,
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 30, bottom: 10),
+                                            child: Text(
+                                              item.title,
+                                              style: getFontStyleFromMediaSize(
+                                                context,
+                                                384,
+                                                640,
+                                                TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize:
+                                                        myTextSmallFontSize),
+                                                TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize:
+                                                        myTextBigFontSize),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            item.description,
                                             style: getFontStyleFromMediaSize(
                                               context,
                                               384,
                                               640,
                                               TextStyle(
-                                                  fontWeight: FontWeight.bold,
                                                   fontSize:
                                                       myTextSmallFontSize),
                                               TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: myTextBigFontSize),
+                                                  fontSize:
+                                                      myTextMediumFontSize),
                                             ),
                                           ),
-                                        ),
-                                        Text(
-                                          item.description,
-                                          style: getFontStyleFromMediaSize(
-                                            context,
-                                            384,
-                                            640,
-                                            TextStyle(
-                                                fontSize: myTextSmallFontSize),
-                                            TextStyle(
-                                                fontSize: myTextMediumFontSize),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Center(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Expanded(
-                            child: CarouselIndicator(
-                              height: 10,
-                              width: 10,
-                              activeColor: myPrimaryColor,
-                              color: Colors.grey,
-                              count: welcomeScreenSliders.length,
-                              index: welcomeScreenSlidersCurrentIndex,
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "DJOSSI: rien ne nous arrete",
-                            style: getFontStyleFromMediaSize(
-                              context,
-                              384,
-                              640,
-                              TextStyle(
-                                  fontSize: myTextSmallFontSize,
-                                  fontWeight: myNormalFontWeight),
-                              TextStyle(
-                                  fontSize: myTextMediumFontSize,
-                                  fontWeight: myNormalFontWeight),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width / 2.5,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const Login()),
-                                      );
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          myPrimaryColor),
-                                    ),
-                                    child: const Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 8.0, bottom: 8),
-                                      child: Text(
-                                        "SE CONNECTER",
-                                        style: TextStyle(color: Colors.white),
+                                        ],
                                       ),
-                                    ),
-                                  ),
-                                ),
+                                    );
+                                  },
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Center(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Expanded(
+                              child: CarouselIndicator(
+                                height: 10,
+                                width: 10,
+                                activeColor: myPrimaryColor,
+                                color: Colors.grey,
+                                count: welcomeScreenSliders.length,
+                                index: welcomeScreenSlidersCurrentIndex,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width / 2.5,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const Registrer()),
-                                      );
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          myPrimaryColor),
-                                    ),
-                                    child: const Padding(
-                                      padding:
-                                          EdgeInsets.only(top: 8.0, bottom: 8),
-                                      child: Text(
-                                        "S'INSCRIRE",
-                                        style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "DJOSSI: rien ne nous arrete",
+                              style: getFontStyleFromMediaSize(
+                                context,
+                                384,
+                                640,
+                                TextStyle(
+                                    fontSize: myTextSmallFontSize,
+                                    fontWeight: myNormalFontWeight),
+                                TextStyle(
+                                    fontSize: myTextMediumFontSize,
+                                    fontWeight: myNormalFontWeight),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 2.5,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        context.goNamed("login");
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                myPrimaryColor),
+                                      ),
+                                      child: const Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 8.0, bottom: 8),
+                                        child: Text(
+                                          "SE CONNECTER",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              )
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width / 2.5,
+                                    child: TextButton(
+                                      onPressed: () {
+                                        context.goNamed("register");
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                myPrimaryColor),
+                                      ),
+                                      child: const Padding(
+                                        padding: EdgeInsets.only(
+                                            top: 8.0, bottom: 8),
+                                        child: Text(
+                                          "S'INSCRIRE",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ],
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
+        getWifiUnavailableWidget(context),
+      ],
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Future<void> isUserConnected() async {
+    await SharedPreferences.getInstance().then((value) {
+      bool? isConnected = value.getBool('connected');
+      if (isConnected != null && isConnected) {
+        context.goNamed("base");
+      } else {
+        context.goNamed("welecome");
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    isUserConnected();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: screenSize(context)[0],
+      height: screenSize(context)[1],
+      decoration: const BoxDecoration(color: Colors.black),
+      child: Icon(
+        Icons.flutter_dash,
+        size: 100,
+        color: myPrimaryColor,
       ),
     );
   }
@@ -428,13 +473,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'djossi',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => GlobalStateModel(),
+        ),
+      ],
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'djossi',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        routerConfig: myRouter,
       ),
-      home: const WelcomeScreen(),
     );
   }
 }

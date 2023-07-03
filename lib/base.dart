@@ -1,8 +1,9 @@
 import 'package:djossi/available_workers_list.dart';
-import 'package:djossi/login_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
@@ -20,6 +21,35 @@ class Base extends StatefulWidget {
 
 class _BaseState extends State<Base> {
   bool isPasswordVisible = true;
+
+  @override
+  void initState() {
+    getCurrentWorkerFromDatabase("currentUser").then(
+      (value) {
+        if (value.isNotEmpty) {
+          Map<String, dynamic> w = value[0];
+          Provider.of<GlobalStateModel>(context, listen: false).currentWorker =
+              Worker(
+            w["id"],
+            w["firstname"],
+            w["lastname"],
+            w["email"],
+            w["job"],
+            w["tel"],
+            w["profilPhoto"],
+            w["hashedPassword"],
+          );
+          debugPrint("get current user from database successflully");
+        } else {
+          debugPrint("current user from database is empty");
+        }
+      },
+    ).onError((error, stackTrace) {
+      debugPrint(stackTrace.toString());
+      debugPrint("can't get current user from database");
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,30 +84,33 @@ class _BottomNavigationBarExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+    return Stack(children: [
+      Scaffold(
+        body: Center(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          unselectedItemColor: const Color.fromARGB(255, 110, 107, 107),
+          showUnselectedLabels: true,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              tooltip: "Accueil",
+              icon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              tooltip: "Profil",
+              icon: Icon(Icons.contact_emergency),
+              label: 'Profil',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: myPrimaryColor,
+          onTap: _onItemTapped,
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        unselectedItemColor: const Color.fromARGB(255, 110, 107, 107),
-        showUnselectedLabels: true,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            tooltip: "Accueil",
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            tooltip: "Profil",
-            icon: Icon(Icons.contact_emergency),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: myPrimaryColor,
-        onTap: _onItemTapped,
-      ),
-    );
+      getWifiUnavailableWidget(context),
+    ]);
   }
 }
 
@@ -229,95 +262,98 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(
-                FluentIcons.location_12_filled,
-                color: Colors.white,
-                weight: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  "test",
-                  style: getFontStyleFromMediaSize(
-                    context,
-                    384,
-                    640,
-                    TextStyle(
-                      color: Colors.white,
-                      fontSize: myTextSmallFontSize2,
-                    ),
-                    TextStyle(
-                      color: Colors.white,
-                      fontSize: myTitleFontSize,
+    return Stack(children: [
+      Scaffold(
+        appBar: AppBar(
+          title: GestureDetector(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(
+                  FluentIcons.location_12_filled,
+                  color: Colors.white,
+                  weight: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    "test",
+                    style: getFontStyleFromMediaSize(
+                      context,
+                      384,
+                      640,
+                      TextStyle(
+                        color: Colors.white,
+                        fontSize: myTextSmallFontSize2,
+                      ),
+                      TextStyle(
+                        color: Colors.white,
+                        fontSize: myTitleFontSize,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            )
+          ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+        body: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(
+                top: 8.0,
+                bottom: 8,
+              ),
+              child: Text(
+                "LAISSEZ DJOSSI VOUS SIMPLIFIER LA VIE",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          )
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 10, left: 10),
+                child: ListView(
+                  children: [
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                    jobsCard("Coiffure Homme", ""),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(
-              top: 8.0,
-              bottom: 8,
-            ),
-            child: Text(
-              "LAISSEZ DJOSSI VOUS SIMPLIFIER LA VIE",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10, left: 10),
-              child: ListView(
-                children: [
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                  jobsCard("Coiffure Homme", ""),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      getWifiUnavailableWidget(context),
+    ]);
   }
 }
 
@@ -416,150 +452,124 @@ class _ProfilScreenState extends State<ProfilScreen> {
     );
   }
 
+  dynamic globalStateProvider = Provider.of<GlobalStateModel>;
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<GlobalStateModel>(
-      create: (_) => GlobalStateModel(),
-      child: FutureBuilder(
-        future: getCurrentWorker(),
-        builder: (context, snapshot) {
-          String fullName = "";
-          String email = "";
-          if (snapshot.hasData) {
-            fullName = "${snapshot.data?.lastname} ${snapshot.data?.firstname}";
-            email = "${snapshot.data?.email}";
-          } else if (snapshot.hasError) {
-            fullName = "error";
-            email = "error";
-          } else {
-            fullName = "";
-            email = "";
-          }
-          return Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              actions: const [
-                Padding(
-                  padding: EdgeInsets.only(right: 10.0),
-                  child: Icon(
-                    Icons.edit,
-                  ),
-                ),
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 10.0),
+            child: Icon(
+              Icons.edit,
             ),
-            body: ListView(
-              children: [
-                Container(
-                  decoration: BoxDecoration(color: myPrimaryColor),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 30.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 20.0),
-                                child: Text(
-                                  fullName.toUpperCase(),
-                                  style: getFontStyleFromMediaSize(
-                                    context,
-                                    384,
-                                    640,
-                                    const TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                    TextStyle(
-                                      color: Colors.white,
-                                      fontSize: myTextBigFontSize,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                email,
-                                style: getFontStyleFromMediaSize(
-                                  context,
-                                  384,
-                                  640,
-                                  const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                  TextStyle(
-                                    color: Colors.white,
-                                    fontSize: myTextMediumFontSize,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: myPrimaryColor),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 50.0, bottom: 50, left: 20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
                     ),
                   ),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 222, 222, 222),
-                  ),
-                  child: Column(
-                    children: [
-                      settingSection("Gérer mes paramètres de compte", [
-                        settingSectionRow(Icons.phone_android,
-                            "Vérifier votre mobile", () {}),
-                        settingSectionRow(
-                            Icons.email, "Vérifier votre email", () {}),
-                        settingSectionRow(
-                            Icons.contact_emergency, "Gérer mon profil", () {}),
-                        settingSectionRow(
-                            Icons.key, "Changer mon mot de passe", () {}),
-                        settingSectionRow(
-                            Icons.language, "Changer de langue", () {}),
-                      ]),
-                      settingSection("Déconnexion", [
-                        settingSectionRow(
-                            FluentIcons.power_20_filled, "Se déconnecter",
-                            () async {
-                          await (await SharedPreferences.getInstance())
-                              .setBool('connected', false)
-                              .then(
-                                (value) => {
-                                  Fluttertoast.showToast(
-                                    msg: "Vous etes déconnecté avec succes",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.BOTTOM,
-                                    timeInSecForIosWeb: 1,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0,
-                                  ),
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const Login(),
-                                    ),
-                                  ),
-                                },
-                              );
-                        }),
-                      ])
-                    ],
-                  ),
-                )
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: Text(
+                            "${globalStateProvider(context).currentWorker.lastname} ${globalStateProvider(context).currentWorker.firstname}"
+                                .toUpperCase(),
+                            style: getFontStyleFromMediaSize(
+                              context,
+                              384,
+                              640,
+                              const TextStyle(
+                                color: Colors.white,
+                              ),
+                              TextStyle(
+                                color: Colors.white,
+                                fontSize: myTextBigFontSize,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "${globalStateProvider(context).currentWorker.email}",
+                          style: getFontStyleFromMediaSize(
+                            context,
+                            384,
+                            640,
+                            const TextStyle(
+                              color: Colors.white,
+                            ),
+                            TextStyle(
+                              color: Colors.white,
+                              fontSize: myTextMediumFontSize,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 222, 222, 222),
+            ),
+            child: Column(
+              children: [
+                settingSection("Gérer mes paramètres de compte", [
+                  settingSectionRow(
+                      Icons.phone_android, "Vérifier votre mobile", () {}),
+                  settingSectionRow(Icons.email, "Vérifier votre email", () {}),
+                  settingSectionRow(
+                      Icons.contact_emergency, "Gérer mon profil", () {}),
+                  settingSectionRow(
+                      Icons.key, "Changer mon mot de passe", () {}),
+                  settingSectionRow(Icons.language, "Changer de langue", () {}),
+                ]),
+                settingSection("Déconnexion", [
+                  settingSectionRow(
+                      FluentIcons.power_20_filled, "Se déconnecter", () async {
+                    await (await SharedPreferences.getInstance())
+                        .setBool('connected', false)
+                        .then(
+                      (value) {
+                        Fluttertoast.showToast(
+                          msg: "Vous etes déconnecté avec succes",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                        );
+                        context.goNamed('login');
+                      },
+                    );
+                  }),
+                ])
               ],
             ),
-          );
-        },
+          )
+        ],
       ),
     );
   }

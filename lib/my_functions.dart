@@ -1,8 +1,12 @@
 import 'dart:convert';
 
 import 'package:djossi/my_constants.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
@@ -93,4 +97,110 @@ Future<bool> isEmailOrTelAlreadyExist(value) async {
         fontSize: 16.0);
     return true;
   }
+}
+
+//database
+Future<void> createTables(Database database) async {
+  await database.execute("""CREATE TABLE currentUser(
+        id INTEGER,
+        firstname TEXT,
+        lastname TEXT,
+        email TEXT,
+        job TEXT,
+        tel TEXT,
+        profilPhoto TEXT,
+        hashedPassword TEXT
+      )
+      """);
+}
+
+Future<Database> db() async {
+  return openDatabase(
+    'djossi.db',
+    version: 1,
+    onCreate: (Database database, int version) async {
+      await createTables(database);
+    },
+  );
+}
+
+Future<void> deleteAllItem(String tableName) async {
+  final mydb = await db();
+  try {
+    await mydb.rawDelete("DELETE FROM $tableName");
+  } catch (err) {
+    debugPrint("Something went wrong when deleting all items");
+  }
+}
+
+Future<void> replaceExistingCurrentWorker(
+    Worker worker, String tableName) async {
+  final mydb = await db();
+
+  deleteAllItem("currentUser").then((value) async {
+    final data = {
+      "id": worker.id,
+      "firstname": worker.firstname,
+      "lastname": worker.lastname,
+      "email": worker.email,
+      "job": worker.job,
+      "tel": worker.tel,
+      "profilPhoto": worker.profilPhoto,
+      "hashedPassword": worker.hashedPassword,
+    };
+    await mydb.insert(tableName, data,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }).onError((error, stackTrace) {
+    debugPrint("can't delete table items");
+  });
+}
+
+Future<List<Map<String, dynamic>>> getCurrentWorkerFromDatabase(
+    String tableName) async {
+  final mydb = await db();
+  return mydb.query(tableName);
+}
+//-------------------
+
+Visibility getWifiUnavailableWidget(BuildContext context) {
+  return Visibility(
+    visible: Provider.of<InternetConnectionStatus>(context) ==
+        InternetConnectionStatus.disconnected,
+    child: Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(0, 0, 0, 0.9),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          const Icon(
+            FluentIcons.wifi_off_20_filled,
+            color: Colors.white,
+            size: 200,
+          ),
+          Text(
+            "Aucune connexion à internet!",
+            style: getFontStyleFromMediaSize(
+              context,
+              384,
+              640,
+              TextStyle(
+                color: Colors.white,
+                decoration: TextDecoration.none,
+                fontSize: myTextSmallFontSize,
+              ),
+              TextStyle(
+                color: Colors.white,
+                decoration: TextDecoration.none,
+                fontSize: myTextBigFontSize,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

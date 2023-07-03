@@ -1,4 +1,10 @@
+import 'package:djossi/main.dart';
+import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import 'base.dart';
+import 'login_screen.dart';
 
 Color myPrimaryColor = Colors.blue;
 double myTitleFontSize = 30.0;
@@ -13,6 +19,13 @@ double myIconSmallSize = 15;
 FontWeight myNormalFontWeight = FontWeight.w300;
 FontWeight myNormalFontWeight2 = FontWeight.w200;
 
+List<double> screenSize(context) {
+  return [
+    MediaQuery.of(context).size.width,
+    MediaQuery.of(context).size.height
+  ];
+}
+
 List<Color> colorsList = [
   Colors.blue,
   Colors.red,
@@ -24,6 +37,39 @@ List<Color> colorsList = [
   Colors.pink,
   const Color.fromARGB(255, 76, 49, 81),
 ];
+
+// GoRouter configuration
+final myRouter = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(
+      name:
+          'home', // Optional, add name to your routes. Allows you navigate by name instead of path
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      name: 'login',
+      path: '/login',
+      builder: (context, state) => const Login(),
+    ),
+    GoRoute(
+      name: 'register',
+      path: '/register',
+      builder: (context, state) => const Registrer(),
+    ),
+    GoRoute(
+      name: 'base',
+      path: '/base',
+      builder: (context, state) => const Base(),
+    ),
+    GoRoute(
+      name: 'welecome',
+      path: '/welecome',
+      builder: (context, state) => const WelcomeScreen(),
+    ),
+  ],
+);
 
 //DB settings
 String dbServerName = "192.168.1.191";

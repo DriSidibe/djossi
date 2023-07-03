@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:djossi/my_classes.dart';
 import 'package:djossi/my_constants.dart';
-import 'package:djossi/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -96,7 +97,7 @@ class _LoginState extends State<Login> {
   }
 
   void telOrEmailValidation() async {
-    if (await isTelOrEmailOk(telOrEmailController.value.text)) {
+    if (await isTelOrEmailOk(telOrEmailController.value.text.toLowerCase())) {
       setState(() {
         telOrEmailValidationMsg = null;
         passwordValidationMsg = "Mot de passe incorrect";
@@ -129,182 +130,190 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<GlobalStateModel>(
-      create: (_) => GlobalStateModel(),
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            color: myPrimaryColor,
-            onPressed: () {
-              Navigator.pop(context);
-            },
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.white,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              color: myPrimaryColor,
+              onPressed: () {
+                context.goNamed("home");
+              },
+            ),
           ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(
-            left: 30,
-            right: 30,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Text(
-                  "Se connecter",
-                  style: getFontStyleFromMediaSize(
-                    context,
-                    384,
-                    640,
-                    TextStyle(
-                      fontSize: myTitleFontSize,
-                    ),
-                    TextStyle(
-                      fontSize: myTitleFontSize,
+          body: Padding(
+            padding: const EdgeInsets.only(
+              left: 30,
+              right: 30,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    "Se connecter",
+                    style: getFontStyleFromMediaSize(
+                      context,
+                      384,
+                      640,
+                      TextStyle(
+                        fontSize: myTitleFontSize,
+                      ),
+                      TextStyle(
+                        fontSize: myTitleFontSize,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: [
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          TextFormField(
-                            controller: telOrEmailController,
-                            onChanged: (value) {
-                              telOrEmailValidation();
-                            },
-                            validator: (value) => telOrEmailValidationMsg,
-                            cursorColor: myPrimaryColor,
-                            decoration: InputDecoration(
-                              hintText: "Numero de telephone ou adresse e-mail",
-                              focusColor: myPrimaryColor,
-                              hintStyle: getFontStyleFromMediaSize(
-                                context,
-                                384,
-                                640,
-                                TextStyle(fontSize: myTextSmallFontSize2),
-                                TextStyle(fontSize: myTextMediumFontSize),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            TextFormField(
+                              controller: telOrEmailController,
+                              onChanged: (value) {
+                                telOrEmailValidation();
+                              },
+                              validator: (value) => telOrEmailValidationMsg,
+                              cursorColor: myPrimaryColor,
+                              decoration: InputDecoration(
+                                hintText:
+                                    "Numero de telephone ou adresse e-mail",
+                                focusColor: myPrimaryColor,
+                                hintStyle: getFontStyleFromMediaSize(
+                                  context,
+                                  384,
+                                  640,
+                                  TextStyle(fontSize: myTextSmallFontSize2),
+                                  TextStyle(fontSize: myTextMediumFontSize),
+                                ),
                               ),
                             ),
-                          ),
-                          Wrap(
-                            alignment: WrapAlignment.end,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 8, bottom: 20),
-                                child: Wrap(
-                                  alignment: WrapAlignment.end,
-                                  children: [
-                                    Text(
-                                      "Entrez le numero mobile sans le '+' ou le 00 ou le code du pays.",
-                                      style: getFontStyleFromMediaSize(
-                                        context,
-                                        384,
-                                        640,
-                                        TextStyle(
-                                          fontSize: myTextSmallFontSize,
-                                        ),
-                                        TextStyle(
-                                          fontSize: myTextSmallFontSize,
+                            Wrap(
+                              alignment: WrapAlignment.end,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 8, bottom: 20),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.end,
+                                    children: [
+                                      Text(
+                                        "Entrez le numero mobile sans le '+' ou le 00 ou le code du pays.",
+                                        style: getFontStyleFromMediaSize(
+                                          context,
+                                          384,
+                                          640,
+                                          TextStyle(
+                                            fontSize: myTextSmallFontSize,
+                                          ),
+                                          TextStyle(
+                                            fontSize: myTextSmallFontSize,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          TextFormField(
-                            controller: passwordController,
-                            validator: (value) => passwordValidationMsg,
-                            onChanged: (value) {
-                              passwordValidation();
-                            },
-                            obscureText: isPasswordVisible,
-                            cursorColor: myPrimaryColor,
-                            decoration: InputDecoration(
-                              hintText: "Mot de passe",
-                              focusColor: myPrimaryColor,
-                              hintStyle: getFontStyleFromMediaSize(
-                                context,
-                                384,
-                                640,
-                                TextStyle(fontSize: myTextSmallFontSize2),
-                                TextStyle(fontSize: myTextMediumFontSize),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: isPasswordVisible
-                                    ? const Icon(Icons.visibility_off)
-                                    : const Icon(Icons.visibility),
-                                onPressed: () {
-                                  setState(
-                                    () {
-                                      isPasswordVisible = !isPasswordVisible;
-                                    },
-                                  );
-                                },
+                              ],
+                            ),
+                            TextFormField(
+                              controller: passwordController,
+                              validator: (value) => passwordValidationMsg,
+                              onChanged: (value) {
+                                passwordValidation();
+                              },
+                              obscureText: isPasswordVisible,
+                              cursorColor: myPrimaryColor,
+                              decoration: InputDecoration(
+                                hintText: "Mot de passe",
+                                focusColor: myPrimaryColor,
+                                hintStyle: getFontStyleFromMediaSize(
+                                  context,
+                                  384,
+                                  640,
+                                  TextStyle(fontSize: myTextSmallFontSize2),
+                                  TextStyle(fontSize: myTextMediumFontSize),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: isPasswordVisible
+                                      ? const Icon(Icons.visibility_off)
+                                      : const Icon(Icons.visibility),
+                                  onPressed: () {
+                                    setState(
+                                      () {
+                                        isPasswordVisible = !isPasswordVisible;
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(top: 8, bottom: 20),
-                                child: Text(
-                                  "Vous avez oubliez votre mot de passe?",
-                                  style: TextStyle(fontSize: 10),
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(top: 8, bottom: 20),
+                                  child: Text(
+                                    "Vous avez oubliez votre mot de passe?",
+                                    style: TextStyle(fontSize: 10),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Consumer<GlobalStateModel>(
-                            builder: (context, model, child) => ElevatedButton(
+                              ],
+                            ),
+                            ElevatedButton(
                               onPressed: () async {
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
                                 if (_formKey.currentState!.validate()) {
-                                  isAllOk(telOrEmailController.value.text,
+                                  isAllOk(
+                                          telOrEmailController.value.text
+                                              .toLowerCase(),
                                           passwordController.value.text)
                                       .then(
                                     (value) async {
                                       if (value) {
-                                        model.currentWorker = currentWorker;
-                                        prefs.setInt('currentWorkerId',
-                                            currentWorker.id);
-                                        (await SharedPreferences.getInstance())
-                                            .setBool('connected', true)
-                                            .then(
-                                          (value) {
-                                            Fluttertoast.showToast(
-                                              msg:
-                                                  "Vous etes connecté avec succes",
-                                              toastLength: Toast.LENGTH_SHORT,
-                                              gravity: ToastGravity.BOTTOM,
-                                              timeInSecForIosWeb: 1,
-                                              textColor: Colors.white,
-                                              fontSize: 16.0,
-                                            );
-
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const Base(),
-                                              ),
-                                            );
-                                          },
-                                        );
+                                        Provider.of<GlobalStateModel>(context,
+                                                listen: false)
+                                            .currentWorker = currentWorker;
+                                        replaceExistingCurrentWorker(
+                                                currentWorker, "currentUser")
+                                            .then((value) async {
+                                          debugPrint(
+                                              "current user replace successfuly");
+                                          prefs.setInt('currentWorkerId',
+                                              currentWorker.id);
+                                          (await SharedPreferences
+                                                  .getInstance())
+                                              .setBool('connected', true)
+                                              .then(
+                                            (value) {
+                                              Fluttertoast.showToast(
+                                                msg:
+                                                    "Vous etes connecté avec succes",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0,
+                                              );
+                                              context.goNamed("base");
+                                            },
+                                          );
+                                        }).onError((error, stackTrace) {
+                                          debugPrint(
+                                              "can't replace current user");
+                                          exit(1);
+                                        });
                                       }
                                     },
                                   );
@@ -331,56 +340,52 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                             ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "vous n'avez pas de compte?",
-                                style: getFontStyleFromMediaSize(
-                                  context,
-                                  384,
-                                  640,
-                                  TextStyle(fontSize: myTextSmallFontSize),
-                                  TextStyle(fontSize: myTextMediumFontSize),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const Registrer()),
-                                  );
-                                },
-                                child: Text(
-                                  "créez en maintenant!",
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "vous n'avez pas de compte?",
                                   style: getFontStyleFromMediaSize(
                                     context,
                                     384,
                                     640,
-                                    TextStyle(
-                                        color: myPrimaryColor,
-                                        fontSize: myTextSmallFontSize),
-                                    TextStyle(
-                                        color: myPrimaryColor,
-                                        fontSize: myTextMediumFontSize),
+                                    TextStyle(fontSize: myTextSmallFontSize),
+                                    TextStyle(fontSize: myTextMediumFontSize),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                TextButton(
+                                  onPressed: () {
+                                    context.goNamed("register");
+                                  },
+                                  child: Text(
+                                    "créez en maintenant!",
+                                    style: getFontStyleFromMediaSize(
+                                      context,
+                                      384,
+                                      640,
+                                      TextStyle(
+                                          color: myPrimaryColor,
+                                          fontSize: myTextSmallFontSize),
+                                      TextStyle(
+                                          color: myPrimaryColor,
+                                          fontSize: myTextMediumFontSize),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
-      ),
+        getWifiUnavailableWidget(context),
+      ],
     );
   }
 }
