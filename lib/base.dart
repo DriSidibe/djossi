@@ -130,9 +130,10 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => WorkersList(
-                      categoryTitle: title,
-                    )),
+              builder: (context) => WorkersList(
+                categoryTitle: title,
+              ),
+            ),
           );
         },
         child: Card(

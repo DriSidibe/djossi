@@ -30,11 +30,17 @@ class GlobalStateModel extends ChangeNotifier {
     "",
     "",
   );
+  List<String> _availableJobs = [];
 
   Worker get currentWorker => _currentWorker;
-
   set currentWorker(Worker newWorker) {
     _currentWorker = newWorker;
+    notifyListeners();
+  }
+
+  List<String> get availableJobs => _availableJobs;
+  set availableJobs(List<String> newJobs) {
+    _availableJobs = newJobs;
     notifyListeners();
   }
 }

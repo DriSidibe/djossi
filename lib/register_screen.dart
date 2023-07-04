@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'my_classes.dart';
@@ -25,8 +25,6 @@ class _RegistrerState extends State<Registrer> {
   bool isPasswordVisible = true;
   List<String> jobsList = [
     "--selectionnez un métier--",
-    "Plombier",
-    "Menuisier"
   ];
   final photoNameFieldController = TextEditingController();
   File? galleryFile;
@@ -36,6 +34,15 @@ class _RegistrerState extends State<Registrer> {
   void dispose() {
     photoNameFieldController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    setState(() {
+      jobsList.addAll(
+          Provider.of<GlobalStateModel>(context, listen: false).availableJobs);
+    });
+    super.initState();
   }
 
   void _showPicker({
@@ -446,104 +453,102 @@ class _RegistrerState extends State<Registrer> {
                           ElevatedButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
-                                var client = http.Client();
                                 try {
                                   if (!await isEmailAlreadyExist(
                                           emailTextFieldController
                                               .value.text) &&
                                       !await isTelAlreadyExist(
                                           telTextFieldController.value.text)) {
-                                    var response = await client.get(
-                                      Uri.http(
-                                        '192.168.1.191:8000',
-                                        'workers/add',
-                                        {
-                                          'firstname':
-                                              firstnameTextFieldController
-                                                  .value.text
-                                                  .toString(),
-                                          'lastname':
-                                              lastnameTextFieldController
-                                                  .value.text
-                                                  .toString(),
-                                          'job': jobTextFieldValue.toString(),
-                                          'hashed_password':
-                                              passwordTextFieldController
-                                                  .value.text
-                                                  .toString(),
-                                          'tel': telTextFieldController
-                                              .value.text
-                                              .toString(),
-                                          'profil_photo':
-                                              "photoNameFieldController.value",
-                                          'email': emailTextFieldController
-                                              .value.text
-                                              .toString()
-                                              .toLowerCase(),
-                                        },
-                                      ),
-                                    );
-                                    if (response.body != "0") {
-                                      // ignore: use_build_context_synchronously
-                                      Fluttertoast.showToast(
-                                          msg: "Une erreur est survenue",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.BOTTOM,
-                                          timeInSecForIosWeb: 1,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0);
-                                    } else {
-                                      Fluttertoast.showToast(
-                                          msg: "Enrégistré avec succes",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.BOTTOM,
-                                          timeInSecForIosWeb: 1,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0);
-                                      await (await SharedPreferences
-                                              .getInstance())
-                                          .setBool('connected', true)
-                                          .then(
-                                        (value) async {
-                                          dynamic id;
-                                          getWorkerBy(emailTextFieldController
-                                                  .value.text)
-                                              .then(
-                                            (value) async {
-                                              id = value.id;
+                                    getRessourcesFromApi(
+                                      '192.168.1.191:8000',
+                                      'workers/add',
+                                      {
+                                        'firstname':
+                                            firstnameTextFieldController
+                                                .value.text
+                                                .toString(),
+                                        'lastname': lastnameTextFieldController
+                                            .value.text
+                                            .toString(),
+                                        'job': jobTextFieldValue.toString(),
+                                        'hashed_password':
+                                            passwordTextFieldController
+                                                .value.text
+                                                .toString(),
+                                        'tel': telTextFieldController.value.text
+                                            .toString(),
+                                        'profil_photo':
+                                            "photoNameFieldController.value",
+                                        'email': emailTextFieldController
+                                            .value.text
+                                            .toString()
+                                            .toLowerCase(),
+                                      },
+                                    ).then((response) async {
+                                      if (response.body != "0") {
+                                        // ignore: use_build_context_synchronously
+                                        Fluttertoast.showToast(
+                                            msg: "Une erreur est survenue",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 1,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0);
+                                      } else {
+                                        Fluttertoast.showToast(
+                                            msg: "Enrégistré avec succes",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIosWeb: 1,
+                                            textColor: Colors.white,
+                                            fontSize: 16.0);
+                                        await (await SharedPreferences
+                                                .getInstance())
+                                            .setBool('connected', true)
+                                            .then(
+                                          (value) async {
+                                            dynamic id;
+                                            getWorkerBy(emailTextFieldController
+                                                    .value.text)
+                                                .then(
+                                              (value) async {
+                                                id = value.id;
 
-                                              replaceExistingCurrentWorker(
-                                                      Worker(
-                                                        id,
-                                                        firstnameTextFieldController
-                                                            .value.text,
-                                                        lastnameTextFieldController
-                                                            .value.text,
-                                                        emailTextFieldController
-                                                            .value.text,
-                                                        jobTextFieldValue,
-                                                        telTextFieldController
-                                                            .value.text,
-                                                        photoNameFieldController
-                                                            .text,
-                                                        hashedPassword,
-                                                      ),
-                                                      "currentUser")
-                                                  .then((value) {
-                                                context.goNamed("base");
-                                              }).onError((error, stackTrace) =>
-                                                      exit(1));
-                                            },
-                                          ).onError(
-                                            (error, stackTrace) {
-                                              exit(1);
-                                            },
-                                          );
-                                        },
-                                      ).onError(
-                                        (error, stackTrace) => exit(1),
-                                      );
-                                    }
+                                                replaceExistingCurrentWorker(
+                                                        Worker(
+                                                          id,
+                                                          firstnameTextFieldController
+                                                              .value.text,
+                                                          lastnameTextFieldController
+                                                              .value.text,
+                                                          emailTextFieldController
+                                                              .value.text,
+                                                          jobTextFieldValue,
+                                                          telTextFieldController
+                                                              .value.text,
+                                                          photoNameFieldController
+                                                              .text,
+                                                          hashedPassword,
+                                                        ),
+                                                        "currentUser")
+                                                    .then((value) {
+                                                  context.goNamed("base");
+                                                }).onError(
+                                                  (error, stackTrace) =>
+                                                      exit(1),
+                                                );
+                                              },
+                                            ).onError(
+                                              (error, stackTrace) {
+                                                exit(1);
+                                              },
+                                            );
+                                          },
+                                        ).onError(
+                                          (error, stackTrace) => exit(1),
+                                        );
+                                      }
+                                    });
                                   } else {
                                     Fluttertoast.showToast(
                                         msg:
@@ -565,8 +570,6 @@ class _RegistrerState extends State<Registrer> {
                                         textColor: Colors.white,
                                         fontSize: 16.0);
                                   }
-                                } finally {
-                                  client.close();
                                 }
                               }
                             },

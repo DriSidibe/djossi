@@ -99,6 +99,20 @@ Future<bool> isEmailOrTelAlreadyExist(value) async {
   }
 }
 
+Future<http.Response> getRessourcesFromApi(
+    String socket, String rl, Map<String, dynamic> params) async {
+  var client = http.Client();
+  dynamic result = await client.get(
+    Uri.http(
+      socket,
+      rl,
+      params,
+    ),
+  );
+  client.close();
+  return result;
+}
+
 //database
 Future<void> createTables(Database database) async {
   await database.execute("""CREATE TABLE currentUser(

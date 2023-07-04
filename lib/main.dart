@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -444,12 +445,41 @@ class _SplashScreenState extends State<SplashScreen> {
       } else {
         context.goNamed("welecome");
       }
+    }).onError((error, stackTrace) {
+      debugPrint("can't get isconnected value");
+    });
+  }
+
+  Future<void> updateAllAvailableJobsList() async {
+    Provider.of<GlobalStateModel>(context, listen: false).availableJobs = [];
+    getRessourcesFromApi('192.168.1.191:8000', 'jobs', {}).then((value) {
+      var i = 0;
+      try {
+        while (true) {
+          debugPrint(jsonDecode(value.body)[i.toString()]);
+          Provider.of<GlobalStateModel>(context, listen: false)
+              .availableJobs
+              .add(jsonDecode(value.body)[i.toString()]);
+          i++;
+        }
+      } catch (e) {
+        debugPrint(
+            "-----------this error append----------\n$e\n--------------------");
+      }
+    }).onError((error, stackTrace) {
+      debugPrint("can't get jobs from server");
     });
   }
 
   @override
   void initState() {
-    isUserConnected();
+    updateAllAvailableJobsList()
+        .then(
+          (value) => isUserConnected(),
+        )
+        .onError(
+          (error, stackTrace) => debugPrint("error on init Splashscreen"),
+        );
     super.initState();
   }
 
@@ -473,20 +503,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => GlobalStateModel(),
-        ),
-      ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'djossi',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        routerConfig: myRouter,
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: 'djossi',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      routerConfig: myRouter,
     );
   }
 }
