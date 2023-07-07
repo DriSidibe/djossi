@@ -52,6 +52,12 @@ List<Color> colorsList = [
   const Color.fromARGB(255, 76, 49, 81),
 ];
 
+InputDecoration myInputDecoration = InputDecoration(
+  border: OutlineInputBorder(
+    borderSide: BorderSide(color: myPrimaryColor),
+  ),
+);
+
 // GoRouter configuration
 final myRouter = GoRouter(
   initialLocation: '/',
