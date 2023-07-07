@@ -23,8 +23,9 @@ class _LoginState extends State<Login> {
   bool isPasswordVisible = true;
   var telOrEmailController = TextEditingController();
   var passwordController = TextEditingController();
-  dynamic telOrEmailValidationMsg = "";
+  dynamic telOrEmailValidationMsg = "cet identifiant n'existe pas";
   dynamic passwordValidationMsg;
+  bool laoding = false;
 
   late Worker currentWorker;
   final _formKey = GlobalKey<FormState>();
@@ -60,7 +61,6 @@ class _LoginState extends State<Login> {
           if (value.firstname != "") {
             return true;
           }
-
           return false;
         },
       ).onError(
@@ -110,9 +110,9 @@ class _LoginState extends State<Login> {
   }
 
   void passwordValidation() async {
-    if (await isTelOrEmailOk(telOrEmailController.value.text)) {
-      if (await isPasswordOk(
-          telOrEmailController.value.text, passwordController.value.text)) {
+    if (await isTelOrEmailOk(telOrEmailController.value.text.toLowerCase())) {
+      if (await isPasswordOk(telOrEmailController.value.text.toLowerCase(),
+          passwordController.value.text)) {
         setState(() {
           passwordValidationMsg = null;
         });
@@ -140,7 +140,7 @@ class _LoginState extends State<Login> {
               icon: const Icon(Icons.arrow_back),
               color: myPrimaryColor,
               onPressed: () {
-                context.goNamed("home");
+                context.goNamed("welecome");
               },
             ),
           ),
@@ -198,33 +198,30 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                             ),
-                            Wrap(
-                              alignment: WrapAlignment.end,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 8, bottom: 20),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.end,
-                                    children: [
-                                      Text(
-                                        "Entrez le numero mobile sans le '+' ou le 00 ou le code du pays.",
-                                        style: getFontStyleFromMediaSize(
-                                          context,
-                                          384,
-                                          640,
-                                          TextStyle(
-                                            fontSize: myTextSmallFontSize,
-                                          ),
-                                          TextStyle(
-                                            fontSize: myTextSmallFontSize,
-                                          ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8, bottom: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Wrap(children: [
+                                    Text(
+                                      "Entrez le numero mobile sans le '+' ou le 00 ou le code du pays.",
+                                      style: getFontStyleFromMediaSize(
+                                        context,
+                                        384,
+                                        640,
+                                        TextStyle(
+                                          fontSize: myTextSmallFontSize,
+                                        ),
+                                        TextStyle(
+                                          fontSize: myTextSmallFontSize,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                    ),
+                                  ]),
+                                ],
+                              ),
                             ),
                             TextFormField(
                               controller: passwordController,
@@ -272,6 +269,9 @@ class _LoginState extends State<Login> {
                             ),
                             ElevatedButton(
                               onPressed: () async {
+                                setState(() {
+                                  laoding = true;
+                                });
                                 SharedPreferences prefs =
                                     await SharedPreferences.getInstance();
                                 if (_formKey.currentState!.validate()) {
@@ -318,26 +318,34 @@ class _LoginState extends State<Login> {
                                     },
                                   );
                                 }
+                                setState(() {
+                                  laoding = false;
+                                });
                               },
                               style: ButtonStyle(
                                 backgroundColor:
                                     MaterialStatePropertyAll(myPrimaryColor),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      "s'identifier",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white,
-                                    ),
-                                  ],
-                                ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: laoding
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.white,
+                                      )
+                                    : const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "s'identifier",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                          Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.white,
+                                          ),
+                                        ],
+                                      ),
                               ),
                             ),
                             Row(

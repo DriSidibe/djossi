@@ -437,6 +437,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  dynamic globalStateModel;
+
   Future<void> isUserConnected() async {
     await SharedPreferences.getInstance().then((value) {
       bool? isConnected = value.getBool('connected');
@@ -450,32 +452,63 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  Future<void> updateAllAvailableJobsList() async {
-    Provider.of<GlobalStateModel>(context, listen: false).availableJobs = [];
+  Future<void> updateAllAvailableJobsList(context) async {
     getRessourcesFromApi('192.168.1.191:8000', 'jobs', {}).then((value) {
-      var i = 0;
-      try {
-        while (true) {
-          debugPrint(jsonDecode(value.body)[i.toString()]);
-          Provider.of<GlobalStateModel>(context, listen: false)
-              .availableJobs
-              .add(jsonDecode(value.body)[i.toString()]);
-          i++;
-        }
-      } catch (e) {
-        debugPrint(
-            "-----------this error append----------\n$e\n--------------------");
-      }
+      Map<String, dynamic> data = jsonDecode(value.body);
+      List<String> jobList = [];
+      data.forEach((key, value) {
+        jobList.add(value);
+      });
+      jobList.sort((a, b) => a.toString().compareTo(b.toString()));
+      globalStateModel.availableJobs = jobList;
     }).onError((error, stackTrace) {
-      debugPrint("can't get jobs from server");
+      debugPrint(
+          "------------can't get jobs from server with error:-------------\n$error\n---------------");
+    });
+  }
+
+  Future<void> getAllWorkers(context) async {
+    getRessourcesFromApi('192.168.1.191:8000', 'workers', {}).then((value) {
+      debugPrint("get all workers successfully");
+      Map<String, dynamic> data = jsonDecode(value.body);
+      List<Worker> workersList = [];
+      data.forEach(
+        (key, value) {
+          workersList.add(
+            Worker(
+                value["id"],
+                value["firstname"],
+                value["lastname"],
+                value["email"],
+                value["job"],
+                value["tel"],
+                value["profil_photo"],
+                value["hashed_password"],
+                value["rate"],
+                value["description"]),
+          );
+        },
+      );
+      globalStateModel.allWorkers = workersList;
+    }).onError((error, stackTrace) {
+      debugPrint(
+          "------------can't get workers from server with error:-------------\n$error\n---------------");
     });
   }
 
   @override
+  void didChangeDependencies() {
+    globalStateModel = Provider.of<GlobalStateModel>(context, listen: false);
+    super.didChangeDependencies();
+  }
+
+  @override
   void initState() {
-    updateAllAvailableJobsList()
+    updateAllAvailableJobsList(context)
         .then(
-          (value) => isUserConnected(),
+          (value) => getAllWorkers(context).then(
+            (value) => isUserConnected(),
+          ),
         )
         .onError(
           (error, stackTrace) => debugPrint("error on init Splashscreen"),

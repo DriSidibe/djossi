@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:djossi/my_constants.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_custom_selector/flutter_custom_selector.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class _RegistrerState extends State<Registrer> {
   final photoNameFieldController = TextEditingController();
   File? galleryFile;
   final picker = ImagePicker();
+  bool registring = false;
 
   @override
   void dispose() {
@@ -168,7 +170,7 @@ class _RegistrerState extends State<Registrer> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
-                                    controller: lastnameTextFieldController,
+                                    controller: firstnameTextFieldController,
                                     validator: (value) {
                                       // ignore: unrelated_type_equality_checks
                                       if (value == null || value.isEmpty) {
@@ -177,6 +179,11 @@ class _RegistrerState extends State<Registrer> {
                                       return null;
                                     },
                                     cursorColor: myPrimaryColor,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter(
+                                          RegExp(r'[a-zA-Z]'),
+                                          allow: true)
+                                    ],
                                     decoration: InputDecoration(
                                       hintText: "Prénom",
                                       hintStyle: getFontStyleFromMediaSize(
@@ -197,15 +204,19 @@ class _RegistrerState extends State<Registrer> {
                                 ),
                                 Expanded(
                                   child: TextFormField(
-                                    controller: firstnameTextFieldController,
+                                    controller: lastnameTextFieldController,
                                     validator: (value) {
-                                      // ignore: unrelated_type_equality_checks
                                       if (value == null || value.isEmpty) {
                                         return 'Ce champs doit etre renseigné';
                                       }
                                       return null;
                                     },
                                     cursorColor: myPrimaryColor,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter(
+                                          RegExp(r'[a-zA-Z]'),
+                                          allow: true)
+                                    ],
                                     decoration: InputDecoration(
                                       hintText: "Nom",
                                       hintStyle: getFontStyleFromMediaSize(
@@ -352,12 +363,10 @@ class _RegistrerState extends State<Registrer> {
                             child: TextFormField(
                               controller: passwordTextFieldController,
                               validator: (value) {
-                                // ignore: unrelated_type_equality_checks
                                 if (value == null ||
                                     value.isEmpty ||
-                                    // ignore: unrelated_type_equality_checks
-                                    passwordTextFieldController.value !=
-                                        firstPassword.value) {
+                                    passwordTextFieldController.value.text !=
+                                        firstPassword.value.text) {
                                   return 'Les mots de passe ne correspondent pas';
                                 }
                                 return null;
@@ -452,6 +461,9 @@ class _RegistrerState extends State<Registrer> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
+                              setState(() {
+                                registring = true;
+                              });
                               if (_formKey.currentState!.validate()) {
                                 try {
                                   if (!await isEmailAlreadyExist(
@@ -513,25 +525,31 @@ class _RegistrerState extends State<Registrer> {
                                                 .then(
                                               (value) async {
                                                 id = value.id;
-
+                                                Worker currentWorker = Worker(
+                                                  id,
+                                                  firstnameTextFieldController
+                                                      .value.text,
+                                                  lastnameTextFieldController
+                                                      .value.text,
+                                                  emailTextFieldController
+                                                      .value.text,
+                                                  jobTextFieldValue,
+                                                  telTextFieldController
+                                                      .value.text,
+                                                  photoNameFieldController.text,
+                                                  hashedPassword,
+                                                  0,
+                                                  "",
+                                                );
                                                 replaceExistingCurrentWorker(
-                                                        Worker(
-                                                          id,
-                                                          firstnameTextFieldController
-                                                              .value.text,
-                                                          lastnameTextFieldController
-                                                              .value.text,
-                                                          emailTextFieldController
-                                                              .value.text,
-                                                          jobTextFieldValue,
-                                                          telTextFieldController
-                                                              .value.text,
-                                                          photoNameFieldController
-                                                              .text,
-                                                          hashedPassword,
-                                                        ),
+                                                        currentWorker,
                                                         "currentUser")
                                                     .then((value) {
+                                                  Provider.of<GlobalStateModel>(
+                                                              context,
+                                                              listen: false)
+                                                          .currentWorker =
+                                                      currentWorker;
                                                   context.goNamed("base");
                                                 }).onError(
                                                   (error, stackTrace) =>
@@ -572,26 +590,33 @@ class _RegistrerState extends State<Registrer> {
                                   }
                                 }
                               }
+                              setState(() {
+                                registring = false;
+                              });
                             },
                             style: ButtonStyle(
                               backgroundColor:
                                   MaterialStatePropertyAll(myPrimaryColor),
                             ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Enregistrer",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: registring
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Enregistrer",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
                           Row(

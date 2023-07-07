@@ -39,37 +39,21 @@ Future<Worker> getWorkerBy(value) async {
     Map<String, dynamic> responseToMap = json.decode(response.body)[0];
     if (response.body.isNotEmpty) {
       return Worker(
-        responseToMap["id"]!,
-        responseToMap["firstname"]!,
-        responseToMap["lastname"]!,
-        responseToMap["email"]!,
-        responseToMap["job"]!,
-        responseToMap["tel"]!,
-        responseToMap["profil_photo"]!,
-        responseToMap["hashed_password"]!,
-      );
+          responseToMap["id"],
+          responseToMap["firstname"],
+          responseToMap["lastname"],
+          responseToMap["email"],
+          responseToMap["job"],
+          responseToMap["tel"],
+          responseToMap["profil_photo"],
+          responseToMap["hashed_password"],
+          responseToMap["rate"] ?? 0,
+          responseToMap["description"] ?? "");
     }
-    return Worker(
-      0,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    );
+    return defaultWorker;
   } catch (_) {
-    return Worker(
-      0,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    );
+    debugPrint("error----------: ${_.toString()}");
+    return defaultWorker;
   }
 }
 
@@ -123,7 +107,9 @@ Future<void> createTables(Database database) async {
         job TEXT,
         tel TEXT,
         profilPhoto TEXT,
-        hashedPassword TEXT
+        hashedPassword TEXT,
+        rate INTEGER,
+        description TEXT
       )
       """);
 }
@@ -141,7 +127,8 @@ Future<Database> db() async {
 Future<void> deleteAllItem(String tableName) async {
   final mydb = await db();
   try {
-    await mydb.rawDelete("DELETE FROM $tableName");
+    await mydb.rawDelete("DELETE FROM $tableName").then((value) =>
+        debugPrint("delete ald current user in local db with success"));
   } catch (err) {
     debugPrint("Something went wrong when deleting all items");
   }
@@ -162,8 +149,10 @@ Future<void> replaceExistingCurrentWorker(
       "profilPhoto": worker.profilPhoto,
       "hashedPassword": worker.hashedPassword,
     };
-    await mydb.insert(tableName, data,
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await mydb
+        .insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace)
+        .then((value) =>
+            debugPrint("register new user in local db with success"));
   }).onError((error, stackTrace) {
     debugPrint("can't delete table items");
   });

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'base.dart';
 import 'login_screen.dart';
+import 'my_classes.dart';
 
 Color myPrimaryColor = Colors.blue;
 double myTitleFontSize = 30.0;
@@ -25,6 +26,19 @@ List<double> screenSize(context) {
     MediaQuery.of(context).size.height
   ];
 }
+
+Worker defaultWorker = Worker(
+  0,
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  0,
+  "",
+);
 
 List<Color> colorsList = [
   Colors.blue,

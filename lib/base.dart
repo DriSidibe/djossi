@@ -1,4 +1,5 @@
 import 'package:djossi/available_workers_list.dart';
+import 'package:djossi/worker_profil.dart';
 
 import 'package:flutter/material.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -38,6 +39,8 @@ class _BaseState extends State<Base> {
             w["tel"],
             w["profilPhoto"],
             w["hashedPassword"],
+            w["rate"] ?? 0,
+            w["description"] ?? "",
           );
           debugPrint("get current user from database successflully");
         } else {
@@ -328,25 +331,16 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 10, left: 10),
-                child: ListView(
-                  children: [
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                    jobsCard("Coiffure Homme", ""),
-                  ],
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    return jobsCard(
+                        Provider.of<GlobalStateModel>(context)
+                            .availableJobs[index],
+                        "");
+                  },
+                  itemCount: Provider.of<GlobalStateModel>(context)
+                      .availableJobs
+                      .length,
                 ),
               ),
             ),
@@ -493,7 +487,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20.0),
                           child: Text(
-                            "${globalStateProvider(context).currentWorker.lastname} ${globalStateProvider(context).currentWorker.firstname}"
+                            "${globalStateProvider(context).currentWorker.firstname} ${globalStateProvider(context).currentWorker.lastname}"
                                 .toUpperCase(),
                             style: getFontStyleFromMediaSize(
                               context,
@@ -541,8 +535,15 @@ class _ProfilScreenState extends State<ProfilScreen> {
                   settingSectionRow(
                       Icons.phone_android, "Vérifier votre mobile", () {}),
                   settingSectionRow(Icons.email, "Vérifier votre email", () {}),
-                  settingSectionRow(
-                      Icons.contact_emergency, "Gérer mon profil", () {}),
+                  settingSectionRow(Icons.contact_emergency, "Gérer mon profil",
+                      () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WorkerProfil(),
+                      ),
+                    );
+                  }),
                   settingSectionRow(
                       Icons.key, "Changer mon mot de passe", () {}),
                   settingSectionRow(Icons.language, "Changer de langue", () {}),

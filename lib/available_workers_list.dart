@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:djossi/my_classes.dart';
 import 'package:djossi/workers_details.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 
 import 'my_constants.dart';
 import 'my_functions.dart';
@@ -235,6 +237,24 @@ class _WorkersListState extends State<WorkersList> {
     );
   }
 
+  List<Padding> workersList() {
+    List<Padding> myWorkers = [];
+    for (var w in Provider.of<GlobalStateModel>(context).allWorkers) {
+      if (w.job == widget.categoryTitle &&
+          w.tel != Provider.of<GlobalStateModel>(context).currentWorker.tel) {
+        myWorkers.add(availableWorker(
+          FluentIcons.contact_card_16_regular,
+          w.firstname,
+          w.lastname,
+          w.tel,
+          w.description,
+          w.rate,
+        ));
+      }
+    }
+    return myWorkers;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -287,51 +307,46 @@ class _WorkersListState extends State<WorkersList> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    widget.categoryTitle,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                workersList().isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          widget.categoryTitle,
+                          style: getFontStyleFromMediaSize(
+                            context,
+                            384,
+                            640,
+                            TextStyle(
+                              fontSize: myTextSmallFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            TextStyle(
+                              fontSize: myTextBigFontSize,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                    : const Text("")
               ],
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10, left: 10),
-              child: ListView(
-                children: [
-                  availableWorker(
-                    FluentIcons.contact_card_16_regular,
-                    "Drissa",
-                    "Sidibe",
-                    "0556884867",
-                    "Je suis drissa sidibe",
-                    4,
+          workersList().isNotEmpty
+              ? Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10, left: 10),
+                    child: ListView(children: workersList()),
                   ),
-                  availableWorker(
-                    FluentIcons.contact_card_16_regular,
-                    "Laurent",
-                    "Brou",
-                    "0757884867",
-                    "Je suis drissa Brou",
-                    3.5,
+                )
+              : Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Aucun ${widget.categoryTitle} n'est disponible"),
+                    ],
                   ),
-                  availableWorker(
-                    FluentIcons.contact_card_16_regular,
-                    "Killian",
-                    "Mbappe",
-                    "0151884867",
-                    "Je suis drissa Mbappe",
-                    5,
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
         ],
       ),
     );
