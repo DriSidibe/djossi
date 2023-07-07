@@ -94,3 +94,4 @@ final myRouter = GoRouter(
 //DB settings
 String dbServerName = "192.168.1.191";
 String dbServerPort = "8000";
+String socket = "$dbServerName:$dbServerPort";

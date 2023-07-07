@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_selector/widget/flutter_single_select.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 
@@ -24,9 +25,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
       Provider.of<GlobalStateModel>(context, listen: false);
   var myDescriptionTextAreaController = TextEditingController();
   var lastnameController = TextEditingController();
-  var firstController = TextEditingController();
-  var telController = TextEditingController();
-  var jobController = TextEditingController();
+  var firstnameController = TextEditingController();
   var telTextFieldController = TextEditingController();
   List<String> jobsList = [
     "--selectionnez un métier--",
@@ -61,7 +60,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
                   width: screenSize(context)[0] / 2,
                   height: 30,
                   child: TextFormField(
-                    controller: controller,
+                    controller: controller == "" ? null : controller,
                     decoration: myInputDecoration,
                     inputFormatters: [
                       filter == "" ? null : filter,
@@ -74,7 +73,83 @@ class _WorkerProfilState extends State<WorkerProfil> {
     );
   }
 
-  void saveInformations() {}
+  void saveInformations() {
+    getRessourcesFromApi(
+      socket,
+      'workers/update',
+      {
+        'id': globalStateProvider.currentWorker.id.toString(),
+        'firstname': firstnameController.value.text.toString(),
+        'lastname': lastnameController.value.text.toString(),
+        'job': jobTextFieldValue.toString() == "--selectionnez un métier--"
+            ? ""
+            : jobTextFieldValue,
+        'tel': telTextFieldController.value.text.toString(),
+      },
+    ).then((value) {
+      if (value.body.toString() == "0") {
+        replaceExistingCurrentWorker(
+            Worker(
+                globalStateProvider.currentWorker.id,
+                firstnameController.text,
+                lastnameController.text,
+                globalStateProvider.currentWorker.email,
+                jobTextFieldValue == "--selectionnez un métier--"
+                    ? ""
+                    : jobTextFieldValue,
+                telTextFieldController.text,
+                globalStateProvider.currentWorker.profilPhoto,
+                globalStateProvider.currentWorker.hashedPassword,
+                globalStateProvider.currentWorker.rate,
+                myDescriptionTextAreaController.text),
+            "currentUser");
+        Fluttertoast.showToast(
+            msg: "Votre profil à etet modifier avec succes",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        getCurrentWorkerFromDatabase("currentUser").then(
+          (value) {
+            if (value.isNotEmpty) {
+              Map<String, dynamic> w = value[0];
+              globalStateProvider.currentWorker = Worker(
+                w["id"],
+                w["firstname"],
+                w["lastname"],
+                w["email"],
+                w["job"],
+                w["tel"],
+                w["profilPhoto"],
+                w["hashedPassword"],
+                w["rate"] ?? 0,
+                w["description"] ?? "",
+              );
+              debugPrint("get current user from database successflully");
+            } else {
+              debugPrint("current user from database is empty");
+            }
+          },
+        ).onError((error, stackTrace) {
+          debugPrint(stackTrace.toString());
+          debugPrint("can't get current user from database");
+        });
+        setState(() {});
+      } else {
+        Fluttertoast.showToast(
+            msg: "Impossible de modifier votre profil",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    }).onError((error, stackTrace) {
+      debugPrint(
+          "-----------this error occures: $error\n$stackTrace-----------");
+    });
+  }
 
   @override
   void initState() {
@@ -83,10 +158,11 @@ class _WorkerProfilState extends State<WorkerProfil> {
     myDescriptionTextAreaController.text =
         globalStateProvider.currentWorker.description;
     lastnameController.text = globalStateProvider.currentWorker.lastname;
-    firstController.text = globalStateProvider.currentWorker.firstname;
-    telController.text = globalStateProvider.currentWorker.tel;
+    firstnameController.text = globalStateProvider.currentWorker.firstname;
     jobTextFieldValue = globalStateProvider.currentWorker.job;
     telTextFieldController.text = globalStateProvider.currentWorker.tel;
+    myDescriptionTextAreaController.text =
+        globalStateProvider.currentWorker.description;
     setState(() {
       jobsList.addAll(
           Provider.of<GlobalStateModel>(context, listen: false).availableJobs);
@@ -168,7 +244,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
                     ),
                     profilAttribute(
                       "Prenom: ",
-                      firstController,
+                      firstnameController,
                       "",
                       FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'),
                           allow: true),
@@ -176,10 +252,10 @@ class _WorkerProfilState extends State<WorkerProfil> {
                     ),
                     profilAttribute(
                         "Metier: ",
-                        jobController,
+                        "",
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 10),
+                            padding: const EdgeInsets.only(left: 20),
                             child: CustomSingleSelectField<String>(
                               validator: (value) {
                                 if (value == null ||
@@ -203,7 +279,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
                               ),
                               items: jobsList,
                               title: "Metier",
-                              initialValue: jobsList[0],
+                              initialValue: jobTextFieldValue,
                               onSelectionDone: (value) {
                                 setState(() {
                                   jobTextFieldValue = value.toString();
@@ -217,10 +293,10 @@ class _WorkerProfilState extends State<WorkerProfil> {
                         () {}),
                     profilAttribute(
                       "Contact: ",
-                      telController,
+                      "",
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 10),
+                          padding: const EdgeInsets.only(left: 20),
                           child: IntlPhoneField(
                             controller: telTextFieldController,
                             validator: (value) {
