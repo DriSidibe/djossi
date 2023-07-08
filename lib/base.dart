@@ -24,34 +24,9 @@ class _BaseState extends State<Base> {
   bool isPasswordVisible = true;
 
   @override
-  void initState() {
-    getCurrentWorkerFromDatabase("currentUser").then(
-      (value) {
-        if (value.isNotEmpty) {
-          Map<String, dynamic> w = value[0];
-          Provider.of<GlobalStateModel>(context, listen: false).currentWorker =
-              Worker(
-            w["id"],
-            w["firstname"],
-            w["lastname"],
-            w["email"],
-            w["job"],
-            w["tel"],
-            w["profilPhoto"],
-            w["hashedPassword"],
-            w["rate"] ?? 0,
-            w["description"] ?? "",
-          );
-          debugPrint("get current user from database successflully");
-        } else {
-          debugPrint("current user from database is empty");
-        }
-      },
-    ).onError((error, stackTrace) {
-      debugPrint(stackTrace.toString());
-      debugPrint("can't get current user from database");
-    });
-    super.initState();
+  void didChangeDependencies() {
+    getCurrentWorker(context);
+    super.didChangeDependencies();
   }
 
   @override
@@ -309,6 +284,15 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
+                ),
+                child: FutureBuilder(
+                  future: getFileFromFtpServer(
+                      Provider.of<GlobalStateModel>(context)
+                          .currentWorker
+                          .profilPhoto),
+                  builder: (context, snapshot) {
+                    return Image.file(snapshot.data);
+                  },
                 ),
               ),
             )

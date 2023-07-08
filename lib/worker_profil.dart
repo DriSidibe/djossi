@@ -73,7 +73,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
     );
   }
 
-  void saveInformations() {
+  void saveInformations(context) {
     getRessourcesFromApi(
       socket,
       'workers/update',
@@ -85,24 +85,10 @@ class _WorkerProfilState extends State<WorkerProfil> {
             ? ""
             : jobTextFieldValue,
         'tel': telTextFieldController.value.text.toString(),
+        'description': myDescriptionTextAreaController.text,
       },
     ).then((value) {
       if (value.body.toString() == "0") {
-        replaceExistingCurrentWorker(
-            Worker(
-                globalStateProvider.currentWorker.id,
-                firstnameController.text,
-                lastnameController.text,
-                globalStateProvider.currentWorker.email,
-                jobTextFieldValue == "--selectionnez un métier--"
-                    ? ""
-                    : jobTextFieldValue,
-                telTextFieldController.text,
-                globalStateProvider.currentWorker.profilPhoto,
-                globalStateProvider.currentWorker.hashedPassword,
-                globalStateProvider.currentWorker.rate,
-                myDescriptionTextAreaController.text),
-            "currentUser");
         Fluttertoast.showToast(
             msg: "Votre profil à etet modifier avec succes",
             toastLength: Toast.LENGTH_SHORT,
@@ -110,31 +96,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
             timeInSecForIosWeb: 1,
             textColor: Colors.white,
             fontSize: 16.0);
-        getCurrentWorkerFromDatabase("currentUser").then(
-          (value) {
-            if (value.isNotEmpty) {
-              Map<String, dynamic> w = value[0];
-              globalStateProvider.currentWorker = Worker(
-                w["id"],
-                w["firstname"],
-                w["lastname"],
-                w["email"],
-                w["job"],
-                w["tel"],
-                w["profilPhoto"],
-                w["hashedPassword"],
-                w["rate"] ?? 0,
-                w["description"] ?? "",
-              );
-              debugPrint("get current user from database successflully");
-            } else {
-              debugPrint("current user from database is empty");
-            }
-          },
-        ).onError((error, stackTrace) {
-          debugPrint(stackTrace.toString());
-          debugPrint("can't get current user from database");
-        });
+        getCurrentWorker(context);
         setState(() {});
       } else {
         Fluttertoast.showToast(
@@ -153,8 +115,6 @@ class _WorkerProfilState extends State<WorkerProfil> {
 
   @override
   void initState() {
-    super.initState();
-
     myDescriptionTextAreaController.text =
         globalStateProvider.currentWorker.description;
     lastnameController.text = globalStateProvider.currentWorker.lastname;
@@ -167,6 +127,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
       jobsList.addAll(
           Provider.of<GlobalStateModel>(context, listen: false).availableJobs);
     });
+    super.initState();
   }
 
   @override
@@ -371,7 +332,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
                             padding: const EdgeInsets.all(8.0),
                             child: ElevatedButton(
                               onPressed: () {
-                                saveInformations();
+                                saveInformations(context);
                               },
                               child: const Text("Enregistrer"),
                             ),

@@ -240,7 +240,6 @@ class _RegistrerState extends State<Registrer> {
                             child: TextFormField(
                               controller: emailTextFieldController,
                               validator: (value) {
-                                // ignore: unrelated_type_equality_checks
                                 if (value == null || value.isEmpty) {
                                   return 'Ce champs doit etre renseigné';
                                 }
@@ -433,10 +432,8 @@ class _RegistrerState extends State<Registrer> {
                                   ),
                                   onPressed: () {
                                     _showPicker(context: context);
-                                    if (galleryFile != null) {
-                                      photoNameFieldController.text =
-                                          galleryFile!.path;
-                                    }
+                                    photoNameFieldController.text =
+                                        galleryFile!.path;
                                   },
                                 ),
                               ],
@@ -471,6 +468,13 @@ class _RegistrerState extends State<Registrer> {
                                               .value.text) &&
                                       !await isTelAlreadyExist(
                                           telTextFieldController.value.text)) {
+                                    List<String> splitedFileName =
+                                        galleryFile.toString().split("/");
+                                    String imageName = splitedFileName[
+                                        splitedFileName.length - 1];
+                                    imageName = imageName.substring(
+                                        0, imageName.length - 1);
+
                                     getRessourcesFromApi(
                                       '192.168.1.191:8000',
                                       'workers/add',
@@ -489,8 +493,9 @@ class _RegistrerState extends State<Registrer> {
                                                 .toString(),
                                         'tel': telTextFieldController.value.text
                                             .toString(),
-                                        'profil_photo':
-                                            "photoNameFieldController.value",
+                                        'profil_photo': galleryFile != null
+                                            ? imageName
+                                            : "",
                                         'email': emailTextFieldController
                                             .value.text
                                             .toString()
@@ -498,7 +503,6 @@ class _RegistrerState extends State<Registrer> {
                                       },
                                     ).then((response) async {
                                       if (response.body != "0") {
-                                        // ignore: use_build_context_synchronously
                                         Fluttertoast.showToast(
                                             msg: "Une erreur est survenue",
                                             toastLength: Toast.LENGTH_SHORT,
@@ -507,64 +511,62 @@ class _RegistrerState extends State<Registrer> {
                                             textColor: Colors.white,
                                             fontSize: 16.0);
                                       } else {
-                                        Fluttertoast.showToast(
-                                            msg: "Enrégistré avec succes",
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.BOTTOM,
-                                            timeInSecForIosWeb: 1,
-                                            textColor: Colors.white,
-                                            fontSize: 16.0);
-                                        await (await SharedPreferences
-                                                .getInstance())
-                                            .setBool('connected', true)
-                                            .then(
-                                          (value) async {
-                                            dynamic id;
-                                            getWorkerBy(emailTextFieldController
-                                                    .value.text)
-                                                .then(
-                                              (value) async {
-                                                id = value.id;
-                                                Worker currentWorker = Worker(
-                                                  id,
-                                                  firstnameTextFieldController
-                                                      .value.text,
-                                                  lastnameTextFieldController
-                                                      .value.text,
-                                                  emailTextFieldController
-                                                      .value.text,
-                                                  jobTextFieldValue,
-                                                  telTextFieldController
-                                                      .value.text,
-                                                  photoNameFieldController.text,
-                                                  hashedPassword,
-                                                  0,
-                                                  "",
-                                                );
-                                                replaceExistingCurrentWorker(
-                                                        currentWorker,
-                                                        "currentUser")
-                                                    .then((value) {
-                                                  Provider.of<GlobalStateModel>(
-                                                              context,
-                                                              listen: false)
-                                                          .currentWorker =
-                                                      currentWorker;
-                                                  context.goNamed("base");
-                                                }).onError(
-                                                  (error, stackTrace) =>
-                                                      exit(1),
-                                                );
-                                              },
-                                            ).onError(
-                                              (error, stackTrace) {
-                                                exit(1);
-                                              },
-                                            );
-                                          },
-                                        ).onError(
-                                          (error, stackTrace) => exit(1),
-                                        );
+                                        sendFileToFtpServer(galleryFile)
+                                            .then((value) async {
+                                          Fluttertoast.showToast(
+                                              msg: "Enrégistré avec succes",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0);
+                                          setState(() {
+                                            registring = false;
+                                          });
+                                          await (await SharedPreferences
+                                                  .getInstance())
+                                              .setBool('connected', true)
+                                              .then(
+                                            (value) async {
+                                              dynamic id;
+                                              getWorkerBy(
+                                                      emailTextFieldController
+                                                          .value.text)
+                                                  .then(
+                                                (value) async {
+                                                  id = value.id;
+                                                  await (await SharedPreferences
+                                                          .getInstance())
+                                                      .setInt(
+                                                          'currentWorkerId', id)
+                                                      .then((value) {
+                                                    context.goNamed("base");
+                                                  }).onError(
+                                                          (error, stackTrace) {
+                                                    debugPrint(
+                                                        "------can't set current worker id preference on register with error :-----------\n$error\n---------");
+                                                  });
+                                                },
+                                              ).onError(
+                                                (error, stackTrace) {
+                                                  debugPrint(
+                                                      "------can't get current worker by id-----------");
+                                                  //exit(1);
+                                                },
+                                              );
+                                            },
+                                          ).onError(
+                                            (error, stackTrace) {
+                                              exit(1);
+                                            },
+                                          );
+                                        }).onError((error, stackTrace) {
+                                          debugPrint(
+                                              "------can't sent image to the server-----------");
+                                          setState(() {
+                                            registring = false;
+                                          });
+                                        });
                                       }
                                     });
                                   } else {
@@ -576,6 +578,9 @@ class _RegistrerState extends State<Registrer> {
                                         timeInSecForIosWeb: 1,
                                         textColor: Colors.white,
                                         fontSize: 16.0);
+                                    setState(() {
+                                      registring = false;
+                                    });
                                   }
                                 } on Exception catch (_) {
                                   if (_.toString() == "Connection failed") {
@@ -587,12 +592,12 @@ class _RegistrerState extends State<Registrer> {
                                         timeInSecForIosWeb: 1,
                                         textColor: Colors.white,
                                         fontSize: 16.0);
+                                    setState(() {
+                                      registring = false;
+                                    });
                                   }
                                 }
                               }
-                              setState(() {
-                                registring = false;
-                              });
                             },
                             style: ButtonStyle(
                               backgroundColor:
@@ -661,6 +666,14 @@ class _RegistrerState extends State<Registrer> {
                         ],
                       ),
                     ),
+                    galleryFile != null
+                        ? Column(
+                            children: [
+                              Image.file(galleryFile!),
+                              Text(galleryFile.toString()),
+                            ],
+                          )
+                        : const Text("")
                   ],
                 ),
               )

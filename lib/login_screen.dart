@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:djossi/my_classes.dart';
 import 'package:djossi/my_constants.dart';
@@ -285,35 +284,24 @@ class _LoginState extends State<Login> {
                                         Provider.of<GlobalStateModel>(context,
                                                 listen: false)
                                             .currentWorker = currentWorker;
-                                        replaceExistingCurrentWorker(
-                                                currentWorker, "currentUser")
-                                            .then((value) async {
-                                          debugPrint(
-                                              "current user replace successfuly");
-                                          prefs.setInt('currentWorkerId',
-                                              currentWorker.id);
-                                          (await SharedPreferences
-                                                  .getInstance())
-                                              .setBool('connected', true)
-                                              .then(
-                                            (value) {
-                                              Fluttertoast.showToast(
-                                                msg:
-                                                    "Vous etes connecté avec succes",
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                gravity: ToastGravity.BOTTOM,
-                                                timeInSecForIosWeb: 1,
-                                                textColor: Colors.white,
-                                                fontSize: 16.0,
-                                              );
-                                              context.goNamed("base");
-                                            },
-                                          );
-                                        }).onError((error, stackTrace) {
-                                          debugPrint(
-                                              "can't replace current user");
-                                          exit(1);
-                                        });
+                                        prefs.setInt('currentWorkerId',
+                                            currentWorker.id);
+                                        (await SharedPreferences.getInstance())
+                                            .setBool('connected', true)
+                                            .then(
+                                          (value) {
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  "Vous etes connecté avec succes",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0,
+                                            );
+                                            context.goNamed("base");
+                                          },
+                                        );
                                       }
                                     },
                                   );

@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:djossi/my_constants.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ftpconnect/ftpconnect.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -31,9 +35,9 @@ Future<Worker> getWorkerBy(value) async {
     var response = await client.get(
       Uri.http(
         "$dbServerName:$dbServerPort",
-        value.toString().length <= 10
-            ? "workers/by/id/$value/"
-            : "workers/by/teloremail/$value/",
+        value.toString().toLowerCase().length <= 10
+            ? "workers/by/id/${value.toString().toLowerCase()}/"
+            : "workers/by/teloremail/${value.toString().toLowerCase()}/",
       ),
     );
     Map<String, dynamic> responseToMap = json.decode(response.body)[0];
@@ -45,8 +49,8 @@ Future<Worker> getWorkerBy(value) async {
           responseToMap["email"],
           responseToMap["job"],
           responseToMap["tel"],
-          responseToMap["profil_photo"],
-          responseToMap["hashed_password"],
+          responseToMap["profil_photo"] ?? "",
+          responseToMap["hashed_password"] ?? "",
           responseToMap["rate"] ?? 0,
           responseToMap["description"] ?? "");
     }
@@ -148,6 +152,8 @@ Future<void> replaceExistingCurrentWorker(
       "tel": worker.tel,
       "profilPhoto": worker.profilPhoto,
       "hashedPassword": worker.hashedPassword,
+      "rate": worker.rate,
+      "description": worker.description,
     };
     await mydb
         .insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace)
@@ -162,6 +168,96 @@ Future<List<Map<String, dynamic>>> getCurrentWorkerFromDatabase(
     String tableName) async {
   final mydb = await db();
   return mydb.query(tableName);
+}
+
+Future<void> getCurrentWorker(context) async {
+  await SharedPreferences.getInstance().then((value) {
+    int? id = value.getInt('currentWorkerId');
+    getRessourcesFromApi(socket, 'workers/by/id/$id', {}).then(
+      (value) {
+        if (value.body.toString() != "1") {
+          Map<String, dynamic> w = jsonDecode(value.body);
+          debugPrint(w.toString());
+          Provider.of<GlobalStateModel>(context, listen: false).currentWorker =
+              Worker(
+            w["id"],
+            w["firstname"],
+            w["lastname"],
+            w["email"],
+            w["job"],
+            w["tel"],
+            w["profilPhoto"] ?? "",
+            w["hashedPassword"] ?? "",
+            w["rate"] ?? 0,
+            w["description"] ?? "",
+          );
+          debugPrint("get current user from server");
+        } else {
+          debugPrint("current user from server is empty");
+        }
+      },
+    ).onError((error, stackTrace) {
+      debugPrint(stackTrace.toString());
+      debugPrint("can't get current user from server");
+    });
+  });
+}
+
+Future<void> sendFileToFtpServer(file) async {
+  FTPConnect ftpConnect = FTPConnect(dbServerName,
+      port: ftpServerPort, user: ftpServerUsername, pass: ftpServerPassword);
+  await ftpConnect.connect().then((value) async {
+    await ftpConnect.changeDirectory("images").then((value) async {
+      String imageName = basename(file.path);
+
+      ftpConnect.existFile(imageName).then((value) async {
+        if (value == true) {
+          ftpConnect.deleteFile(imageName).then((value) async {
+            await ftpConnect
+                .uploadFileWithRetry(file, pRetryCount: 2)
+                .then((value) {
+              debugPrint("file sent");
+            }).onError((error, stackTrace) {
+              debugPrint("file unsent with error : $error");
+            });
+          }).onError((error, stackTrace) {
+            debugPrint("can't delete image in ftp server");
+          });
+        } else {
+          await ftpConnect
+              .uploadFileWithRetry(file, pRetryCount: 2)
+              .then((value) {
+            debugPrint("file sent");
+          }).onError((error, stackTrace) {
+            debugPrint("file unsent with error : $error");
+          });
+        }
+      });
+    }).onError((error, stackTrace) {
+      debugPrint("can't change directory in ftp server");
+    });
+  });
+  await ftpConnect.disconnect();
+}
+
+Future<dynamic> getFileFromFtpServer(String filename) async {
+  FTPConnect ftpConnect = FTPConnect(dbServerName,
+      port: ftpServerPort, user: ftpServerUsername, pass: ftpServerPassword);
+  String fileExtension = filename.split(".")[1];
+  try {
+    await ftpConnect.connect();
+    await ftpConnect
+        .downloadFile(filename, File('profilImage.$fileExtension'))
+        .then((value) async {
+      await ftpConnect.disconnect();
+      return value;
+    });
+  } catch (e) {
+    debugPrint("can't download profil image");
+    await ftpConnect.disconnect();
+  }
+  await ftpConnect.disconnect();
+  return null;
 }
 //-------------------
 

@@ -91,7 +91,21 @@ final myRouter = GoRouter(
   ],
 );
 
+List<String> allowImageExtensions = [
+  ".img",
+  ".IMG",
+  ".jpg",
+  ".JPG",
+  ".jpeg",
+  ".JPEG",
+  ".png",
+  ".PNG",
+];
+
 //DB settings
 String dbServerName = "192.168.1.191";
+String ftpServerUsername = 'drissa';
+String ftpServerPassword = 'what up?';
+int ftpServerPort = 21;
 String dbServerPort = "8000";
 String socket = "$dbServerName:$dbServerPort";
