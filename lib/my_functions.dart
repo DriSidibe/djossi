@@ -176,7 +176,6 @@ Future<void> getCurrentWorker(context) async {
       (value) {
         if (value.body.toString() != "1") {
           Map<String, dynamic> w = jsonDecode(value.body);
-          debugPrint(w.toString());
           Provider.of<GlobalStateModel>(context, listen: false).currentWorker =
               Worker(
             w["id"],
@@ -206,23 +205,11 @@ Future<void> sendFileToFtpServer(file) async {
   FTPConnect ftpConnect = FTPConnect(dbServerName,
       port: ftpServerPort, user: ftpServerUsername, pass: ftpServerPassword);
   await ftpConnect.connect().then((value) async {
-    await ftpConnect.changeDirectory("images").then((value) async {
-      String imageName = basename(file.path);
-
-      ftpConnect.existFile(imageName).then((value) async {
-        if (value == true) {
-          ftpConnect.deleteFile(imageName).then((value) async {
-            await ftpConnect
-                .uploadFileWithRetry(file, pRetryCount: 2)
-                .then((value) {
-              debugPrint("file sent");
-            }).onError((error, stackTrace) {
-              debugPrint("file unsent with error : $error");
-            });
-          }).onError((error, stackTrace) {
-            debugPrint("can't delete image in ftp server");
-          });
-        } else {
+    String imageName = basename(file.path);
+    ftpConnect.existFile(imageName).then((value) async {
+      debugPrint("-------------- $value");
+      if (value == true) {
+        ftpConnect.deleteFile(imageName).then((value) async {
           await ftpConnect
               .uploadFileWithRetry(file, pRetryCount: 2)
               .then((value) {
@@ -230,11 +217,21 @@ Future<void> sendFileToFtpServer(file) async {
           }).onError((error, stackTrace) {
             debugPrint("file unsent with error : $error");
           });
-        }
-      });
-    }).onError((error, stackTrace) {
-      debugPrint("can't change directory in ftp server");
+        }).onError((error, stackTrace) {
+          debugPrint("can't delete image in ftp server");
+        });
+      } else {
+        await ftpConnect
+            .uploadFileWithRetry(file, pRetryCount: 2)
+            .then((value) {
+          debugPrint("file sent");
+        }).onError((error, stackTrace) {
+          debugPrint("file unsent with error : $error");
+        });
+      }
     });
+  }).onError((error, stackTrace) {
+    debugPrint("can't connect to ftp server");
   });
   await ftpConnect.disconnect();
 }

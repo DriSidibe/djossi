@@ -88,6 +88,7 @@ class _RegistrerState extends State<Registrer> {
       () {
         if (xfilePick != null) {
           galleryFile = File(pickedFile!.path);
+          photoNameFieldController.text = galleryFile!.path;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
               const SnackBar(content: Text('Nothing is selected')));
@@ -410,6 +411,12 @@ class _RegistrerState extends State<Registrer> {
                                   child: TextFormField(
                                     controller: photoNameFieldController,
                                     enabled: false,
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return ("choisissez unz photo");
+                                      }
+                                      return null;
+                                    },
                                     cursorColor: myPrimaryColor,
                                     decoration: InputDecoration(
                                       hintText: "Photo",
@@ -523,6 +530,8 @@ class _RegistrerState extends State<Registrer> {
                                           setState(() {
                                             registring = false;
                                           });
+                                          debugPrint(
+                                              "------image sent to the server-----------");
                                           await (await SharedPreferences
                                                   .getInstance())
                                               .setBool('connected', true)
@@ -666,14 +675,6 @@ class _RegistrerState extends State<Registrer> {
                         ],
                       ),
                     ),
-                    galleryFile != null
-                        ? Column(
-                            children: [
-                              Image.file(galleryFile!),
-                              Text(galleryFile.toString()),
-                            ],
-                          )
-                        : const Text("")
                   ],
                 ),
               )
