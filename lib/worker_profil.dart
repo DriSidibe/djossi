@@ -180,9 +180,14 @@ class _WorkerProfilState extends State<WorkerProfil> {
               alignment: Alignment.bottomRight,
               children: [
                 Container(
+                  width: screenSize(context)[0],
                   height: 200,
                   decoration: BoxDecoration(
                     color: myPrimaryColor,
+                  ),
+                  child: Image.network(
+                    "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
+                    fit: BoxFit.fill,
                   ),
                 ),
                 ElevatedButton(onPressed: () {}, child: const Icon(Icons.edit))

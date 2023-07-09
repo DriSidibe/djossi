@@ -285,14 +285,12 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: FutureBuilder(
-                  future: getFileFromFtpServer(
-                      Provider.of<GlobalStateModel>(context)
-                          .currentWorker
-                          .profilPhoto),
-                  builder: (context, snapshot) {
-                    return Image.file(snapshot.data);
-                  },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.network(
+                    "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ),
             )
@@ -461,6 +459,13 @@ class _ProfilScreenState extends State<ProfilScreen> {
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: Image.network(
+                        "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
                   Padding(

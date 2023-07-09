@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:djossi/my_constants.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -186,7 +185,7 @@ Future<void> getCurrentWorker(context) async {
             w["email"],
             w["job"],
             w["tel"],
-            w["profilPhoto"] ?? "",
+            w["profil_photo"] ?? "",
             w["hashedPassword"] ?? "",
             w["rate"] ?? 0,
             w["description"] ?? "",
@@ -238,26 +237,6 @@ Future<void> sendFileToFtpServer(file) async {
     });
   });
   await ftpConnect.disconnect();
-}
-
-Future<dynamic> getFileFromFtpServer(String filename) async {
-  FTPConnect ftpConnect = FTPConnect(dbServerName,
-      port: ftpServerPort, user: ftpServerUsername, pass: ftpServerPassword);
-  String fileExtension = filename.split(".")[1];
-  try {
-    await ftpConnect.connect();
-    await ftpConnect
-        .downloadFile(filename, File('profilImage.$fileExtension'))
-        .then((value) async {
-      await ftpConnect.disconnect();
-      return value;
-    });
-  } catch (e) {
-    debugPrint("can't download profil image");
-    await ftpConnect.disconnect();
-  }
-  await ftpConnect.disconnect();
-  return null;
 }
 //-------------------
 
