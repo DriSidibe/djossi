@@ -8,7 +8,7 @@ class Worker {
   final String email;
   final String job;
   final String tel;
-  final String profilPhoto;
+  late final String profilPhoto;
   final String hashedPassword;
   final int rate;
   final String description;

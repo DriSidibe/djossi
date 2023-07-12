@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -20,6 +19,16 @@ TextStyle getFontStyleFromMediaSize(BuildContext context, w, h, tVal, fVal) {
           MediaQuery.of(context).size.height < 640
       ? tVal
       : fVal;
+}
+
+void showToast(msg) {
+  Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      textColor: Colors.white,
+      fontSize: 16.0);
 }
 
 Future<void> urlLauncher(url) async {
@@ -204,36 +213,13 @@ Future<void> getCurrentWorker(context) async {
 Future<void> sendFileToFtpServer(file) async {
   FTPConnect ftpConnect = FTPConnect(dbServerName,
       port: ftpServerPort, user: ftpServerUsername, pass: ftpServerPassword);
-  await ftpConnect.connect().then((value) async {
-    String imageName = basename(file.path);
-    ftpConnect.existFile(imageName).then((value) async {
-      debugPrint("-------------- $value");
-      if (value == true) {
-        ftpConnect.deleteFile(imageName).then((value) async {
-          await ftpConnect
-              .uploadFileWithRetry(file, pRetryCount: 2)
-              .then((value) {
-            debugPrint("file sent");
-          }).onError((error, stackTrace) {
-            debugPrint("file unsent with error : $error");
-          });
-        }).onError((error, stackTrace) {
-          debugPrint("can't delete image in ftp server");
-        });
-      } else {
-        await ftpConnect
-            .uploadFileWithRetry(file, pRetryCount: 2)
-            .then((value) {
-          debugPrint("file sent");
-        }).onError((error, stackTrace) {
-          debugPrint("file unsent with error : $error");
-        });
-      }
-    });
-  }).onError((error, stackTrace) {
-    debugPrint("can't connect to ftp server");
-  });
-  await ftpConnect.disconnect();
+  try {
+    await ftpConnect.connect();
+    await ftpConnect.uploadFile(file);
+    await ftpConnect.disconnect();
+  } catch (e) {
+    debugPrint(e.toString());
+  }
 }
 //-------------------
 

@@ -290,6 +290,9 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
                   child: Image.network(
                     "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
                     fit: BoxFit.fill,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(defaultProfilPhoto);
+                    },
                   ),
                 ),
               ),
@@ -465,6 +468,9 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       child: Image.network(
                         "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
                         fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(defaultProfilPhoto);
+                        },
                       ),
                     ),
                   ),

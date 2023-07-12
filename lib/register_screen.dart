@@ -24,6 +24,7 @@ class Registrer extends StatefulWidget {
 
 class _RegistrerState extends State<Registrer> {
   bool isPasswordVisible = true;
+  bool isPhotoPicked = true;
   List<String> jobsList = [
     "--selectionnez un métier--",
   ];
@@ -89,9 +90,7 @@ class _RegistrerState extends State<Registrer> {
         if (xfilePick != null) {
           galleryFile = File(pickedFile!.path);
           photoNameFieldController.text = galleryFile!.path;
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
-              const SnackBar(content: Text('Nothing is selected')));
+          isPhotoPicked = true;
         }
       },
     );
@@ -400,51 +399,64 @@ class _RegistrerState extends State<Registrer> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 20),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 8.0),
-                                  child: Text("Mettez une photo :"),
-                                ),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: photoNameFieldController,
-                                    enabled: false,
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return ("choisissez unz photo");
-                                      }
-                                      return null;
+                            child: Column(children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 8.0),
+                                    child: Text("Mettez une photo :"),
+                                  ),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: photoNameFieldController,
+                                      enabled: false,
+                                      cursorColor: myPrimaryColor,
+                                      decoration: InputDecoration(
+                                        hintText: "Photo",
+                                        hintStyle: getFontStyleFromMediaSize(
+                                          context,
+                                          384,
+                                          640,
+                                          TextStyle(
+                                              fontSize: myTextSmallFontSize2),
+                                          TextStyle(
+                                              fontSize: myTextMediumFontSize),
+                                        ),
+                                        focusColor: myPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.add_a_photo,
+                                    ),
+                                    onPressed: () {
+                                      _showPicker(context: context);
+                                      photoNameFieldController.text =
+                                          galleryFile!.path;
                                     },
-                                    cursorColor: myPrimaryColor,
-                                    decoration: InputDecoration(
-                                      hintText: "Photo",
-                                      hintStyle: getFontStyleFromMediaSize(
+                                  ),
+                                ],
+                              ),
+                              !isPhotoPicked
+                                  ? Text(
+                                      "Choisissez une photo",
+                                      style: getFontStyleFromMediaSize(
                                         context,
                                         384,
                                         640,
                                         TextStyle(
-                                            fontSize: myTextSmallFontSize2),
+                                          fontSize: myTextSmallFontSize,
+                                        ),
                                         TextStyle(
-                                            fontSize: myTextMediumFontSize),
+                                          fontSize: myTextSmallFontSize2,
+                                          color: Colors.red,
+                                        ),
                                       ),
-                                      focusColor: myPrimaryColor,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.add_a_photo,
-                                  ),
-                                  onPressed: () {
-                                    _showPicker(context: context);
-                                    photoNameFieldController.text =
-                                        galleryFile!.path;
-                                  },
-                                ),
-                              ],
-                            ),
+                                    )
+                                  : const Text("")
+                            ]),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 20),
@@ -475,109 +487,118 @@ class _RegistrerState extends State<Registrer> {
                                               .value.text) &&
                                       !await isTelAlreadyExist(
                                           telTextFieldController.value.text)) {
-                                    List<String> splitedFileName =
-                                        galleryFile.toString().split("/");
-                                    String imageName = splitedFileName[
-                                        splitedFileName.length - 1];
-                                    imageName = imageName.substring(
-                                        0, imageName.length - 1);
+                                    if (photoNameFieldController.value.text !=
+                                        "") {
+                                      sendFileToFtpServer(galleryFile)
+                                          .then((value) async {
+                                        List<String> splitedFileName =
+                                            galleryFile.toString().split("/");
+                                        String imageName = splitedFileName[
+                                            splitedFileName.length - 1];
+                                        imageName = imageName.substring(
+                                            0, imageName.length - 1);
+                                        getRessourcesFromApi(
+                                          '192.168.1.191:8000',
+                                          'workers/add',
+                                          {
+                                            'firstname':
+                                                firstnameTextFieldController
+                                                    .value.text
+                                                    .toString(),
+                                            'lastname':
+                                                lastnameTextFieldController
+                                                    .value.text
+                                                    .toString(),
+                                            'job': jobTextFieldValue.toString(),
+                                            'hashed_password':
+                                                passwordTextFieldController
+                                                    .value.text
+                                                    .toString(),
+                                            'tel': telTextFieldController
+                                                .value.text
+                                                .toString(),
+                                            'profil_photo': galleryFile != null
+                                                ? imageName
+                                                : "",
+                                            'email': emailTextFieldController
+                                                .value.text
+                                                .toString()
+                                                .toLowerCase(),
+                                          },
+                                        ).then((response) async {
+                                          if (response.body != "0") {
+                                            Fluttertoast.showToast(
+                                                msg: "Une erreur est survenue",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0);
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: "Enrégistré avec succes",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0);
 
-                                    getRessourcesFromApi(
-                                      '192.168.1.191:8000',
-                                      'workers/add',
-                                      {
-                                        'firstname':
-                                            firstnameTextFieldController
-                                                .value.text
-                                                .toString(),
-                                        'lastname': lastnameTextFieldController
-                                            .value.text
-                                            .toString(),
-                                        'job': jobTextFieldValue.toString(),
-                                        'hashed_password':
-                                            passwordTextFieldController
-                                                .value.text
-                                                .toString(),
-                                        'tel': telTextFieldController.value.text
-                                            .toString(),
-                                        'profil_photo': galleryFile != null
-                                            ? imageName
-                                            : "",
-                                        'email': emailTextFieldController
-                                            .value.text
-                                            .toString()
-                                            .toLowerCase(),
-                                      },
-                                    ).then((response) async {
-                                      if (response.body != "0") {
-                                        Fluttertoast.showToast(
-                                            msg: "Une erreur est survenue",
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.BOTTOM,
-                                            timeInSecForIosWeb: 1,
-                                            textColor: Colors.white,
-                                            fontSize: 16.0);
-                                      } else {
-                                        sendFileToFtpServer(galleryFile)
-                                            .then((value) async {
-                                          Fluttertoast.showToast(
-                                              msg: "Enrégistré avec succes",
-                                              toastLength: Toast.LENGTH_SHORT,
-                                              gravity: ToastGravity.BOTTOM,
-                                              timeInSecForIosWeb: 1,
-                                              textColor: Colors.white,
-                                              fontSize: 16.0);
-                                          setState(() {
-                                            registring = false;
-                                          });
-                                          debugPrint(
-                                              "------image sent to the server-----------");
-                                          await (await SharedPreferences
-                                                  .getInstance())
-                                              .setBool('connected', true)
-                                              .then(
-                                            (value) async {
-                                              dynamic id;
-                                              getWorkerBy(
-                                                      emailTextFieldController
-                                                          .value.text)
-                                                  .then(
-                                                (value) async {
-                                                  id = value.id;
-                                                  await (await SharedPreferences
-                                                          .getInstance())
-                                                      .setInt(
-                                                          'currentWorkerId', id)
-                                                      .then((value) {
-                                                    context.goNamed("base");
-                                                  }).onError(
-                                                          (error, stackTrace) {
+                                            await (await SharedPreferences
+                                                    .getInstance())
+                                                .setBool('connected', true)
+                                                .then(
+                                              (value) async {
+                                                dynamic id;
+                                                getWorkerBy(
+                                                        emailTextFieldController
+                                                            .value.text)
+                                                    .then(
+                                                  (value) async {
+                                                    id = value.id;
+                                                    await (await SharedPreferences
+                                                            .getInstance())
+                                                        .setInt(
+                                                            'currentWorkerId',
+                                                            id)
+                                                        .then((value) {
+                                                      context.goNamed("base");
+                                                    }).onError((error,
+                                                            stackTrace) {
+                                                      debugPrint(
+                                                          "------can't set current worker id preference on register with error :-----------\n$error\n---------");
+                                                    });
+                                                  },
+                                                ).onError(
+                                                  (error, stackTrace) {
                                                     debugPrint(
-                                                        "------can't set current worker id preference on register with error :-----------\n$error\n---------");
-                                                  });
-                                                },
-                                              ).onError(
-                                                (error, stackTrace) {
-                                                  debugPrint(
-                                                      "------can't get current worker by id-----------");
-                                                  //exit(1);
-                                                },
-                                              );
-                                            },
-                                          ).onError(
-                                            (error, stackTrace) {
-                                              exit(1);
-                                            },
-                                          );
-                                        }).onError((error, stackTrace) {
-                                          debugPrint(
-                                              "------can't sent image to the server-----------");
-                                          setState(() {
-                                            registring = false;
-                                          });
+                                                        "------can't get current worker by id-----------");
+                                                    exit(1);
+                                                  },
+                                                );
+                                              },
+                                            ).onError(
+                                              (error, stackTrace) {
+                                                exit(1);
+                                              },
+                                            );
+                                          }
                                         });
-                                      }
-                                    });
+                                        setState(() {
+                                          registring = false;
+                                        });
+                                      }).onError((error, stackTrace) {
+                                        debugPrint(
+                                            "------can't sent image to the server-----------");
+                                        setState(() {
+                                          registring = false;
+                                        });
+                                      });
+                                    } else {
+                                      setState(() {
+                                        isPhotoPicked = false;
+                                        registring = false;
+                                      });
+                                    }
                                   } else {
                                     Fluttertoast.showToast(
                                         msg:
@@ -606,6 +627,10 @@ class _RegistrerState extends State<Registrer> {
                                     });
                                   }
                                 }
+                              } else {
+                                setState(() {
+                                  registring = false;
+                                });
                               }
                             },
                             style: ButtonStyle(

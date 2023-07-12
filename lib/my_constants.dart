@@ -1,5 +1,6 @@
 import 'package:djossi/main.dart';
 import 'package:djossi/register_screen.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -101,6 +102,8 @@ List<String> allowImageExtensions = [
   ".png",
   ".PNG",
 ];
+
+dynamic defaultProfilPhoto = FluentIcons.contact_card_16_filled;
 
 //DB settings
 String dbServerName = "192.168.1.191";

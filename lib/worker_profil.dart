@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:djossi/my_classes.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_custom_selector/widget/flutter_single_select.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +34,8 @@ class _WorkerProfilState extends State<WorkerProfil> {
     "--selectionnez un métier--",
   ];
   var jobTextFieldValue = "";
+  File? galleryFile;
+  final picker = ImagePicker();
 
   Padding profilAttribute(
       attrName, controller, inputType, filter, callbackFunction) {
@@ -73,20 +78,11 @@ class _WorkerProfilState extends State<WorkerProfil> {
     );
   }
 
-  void saveInformations(context) {
+  void saveInformations(context, params) {
     getRessourcesFromApi(
       socket,
       'workers/update',
-      {
-        'id': globalStateProvider.currentWorker.id.toString(),
-        'firstname': firstnameController.value.text.toString(),
-        'lastname': lastnameController.value.text.toString(),
-        'job': jobTextFieldValue.toString() == "--selectionnez un métier--"
-            ? ""
-            : jobTextFieldValue,
-        'tel': telTextFieldController.value.text.toString(),
-        'description': myDescriptionTextAreaController.text,
-      },
+      params,
     ).then((value) {
       if (value.body.toString() == "0") {
         Fluttertoast.showToast(
@@ -106,11 +102,73 @@ class _WorkerProfilState extends State<WorkerProfil> {
             timeInSecForIosWeb: 1,
             textColor: Colors.white,
             fontSize: 16.0);
+        setState(() {});
       }
     }).onError((error, stackTrace) {
       debugPrint(
           "-----------this error occures: $error\n$stackTrace-----------");
     });
+  }
+
+  Future getImage(
+    ImageSource img,
+  ) async {
+    final pickedFile = await picker.pickImage(source: img);
+    XFile? xfilePick = pickedFile;
+    setState(
+      () {
+        if (xfilePick != null) {
+          galleryFile = File(pickedFile!.path);
+          sendFileToFtpServer(galleryFile).then((value) {
+            List<String> splitedFileName = galleryFile.toString().split("/");
+            String imageName = splitedFileName[splitedFileName.length - 1];
+            imageName = imageName.substring(0, imageName.length - 1);
+            globalStateProvider.currentWorker.profilPhoto = imageName;
+            saveInformations(context, {
+              'id': globalStateProvider.currentWorker.id.toString(),
+              'profil_photo': globalStateProvider.currentWorker.profilPhoto,
+            });
+            setState(() {});
+            showToast("photo modifier avec succes");
+          }).onError((error, stackTrace) {
+            showToast("une erreur est survenu");
+            debugPrint(error.toString());
+          });
+        }
+      },
+    );
+  }
+
+  void _showPicker({
+    required BuildContext context,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -176,23 +234,6 @@ class _WorkerProfilState extends State<WorkerProfil> {
         padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
         child: Column(
           children: [
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                Container(
-                  width: screenSize(context)[0],
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: myPrimaryColor,
-                  ),
-                  child: Image.network(
-                    "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
-                    fit: BoxFit.fill,
-                  ),
-                ),
-                ElevatedButton(onPressed: () {}, child: const Icon(Icons.edit))
-              ],
-            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(
@@ -200,6 +241,30 @@ class _WorkerProfilState extends State<WorkerProfil> {
                 ),
                 child: ListView(
                   children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          width: screenSize(context)[0],
+                          height: screenSize(context)[0],
+                          decoration: BoxDecoration(
+                            color: myPrimaryColor,
+                          ),
+                          child: Image.network(
+                            "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
+                            fit: BoxFit.fill,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(defaultProfilPhoto);
+                            },
+                          ),
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              _showPicker(context: context);
+                            },
+                            child: const Icon(Icons.edit))
+                      ],
+                    ),
                     profilAttribute(
                       "Nom: ",
                       lastnameController,
@@ -337,7 +402,22 @@ class _WorkerProfilState extends State<WorkerProfil> {
                             padding: const EdgeInsets.all(8.0),
                             child: ElevatedButton(
                               onPressed: () {
-                                saveInformations(context);
+                                saveInformations(context, {
+                                  'id': globalStateProvider.currentWorker.id
+                                      .toString(),
+                                  'firstname':
+                                      firstnameController.value.text.toString(),
+                                  'lastname':
+                                      lastnameController.value.text.toString(),
+                                  'job': jobTextFieldValue.toString() ==
+                                          "--selectionnez un métier--"
+                                      ? ""
+                                      : jobTextFieldValue,
+                                  'tel': telTextFieldController.value.text
+                                      .toString(),
+                                  'description':
+                                      myDescriptionTextAreaController.text,
+                                });
                               },
                               child: const Text("Enregistrer"),
                             ),
