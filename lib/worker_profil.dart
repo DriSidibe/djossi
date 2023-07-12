@@ -123,10 +123,9 @@ class _WorkerProfilState extends State<WorkerProfil> {
             List<String> splitedFileName = galleryFile.toString().split("/");
             String imageName = splitedFileName[splitedFileName.length - 1];
             imageName = imageName.substring(0, imageName.length - 1);
-            globalStateProvider.currentWorker.profilPhoto = imageName;
             saveInformations(context, {
               'id': globalStateProvider.currentWorker.id.toString(),
-              'profil_photo': globalStateProvider.currentWorker.profilPhoto,
+              'profil_photo': imageName,
             });
             setState(() {});
             showToast("photo modifier avec succes");
