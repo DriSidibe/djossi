@@ -1,4 +1,5 @@
 import 'package:djossi/available_workers_list.dart';
+import 'package:djossi/change_password.dart';
 import 'package:djossi/worker_profil.dart';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
+import 'package:flag/flag.dart';
 
 import 'my_classes.dart';
 import 'my_functions.dart';
@@ -439,11 +441,19 @@ class _ProfilScreenState extends State<ProfilScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 10.0),
-            child: Icon(
-              Icons.edit,
+            padding: const EdgeInsets.only(right: 10.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const WorkerProfil(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit),
             ),
           ),
         ],
@@ -539,9 +549,39 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       ),
                     );
                   }),
-                  settingSectionRow(
-                      Icons.key, "Changer mon mot de passe", () {}),
-                  settingSectionRow(Icons.language, "Changer de langue", () {}),
+                  settingSectionRow(Icons.key, "Changer mon mot de passe", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePassword(),
+                      ),
+                    );
+                  }),
+                  settingSectionRow(Icons.language, "Changer de langue", () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SafeArea(
+                          child: Wrap(
+                            children: <Widget>[
+                              ListTile(
+                                leading: const Flag.fromString("FR",
+                                    height: 50, width: 50, fit: BoxFit.fill),
+                                title: Text(langageList[0]),
+                                onTap: () {},
+                              ),
+                              ListTile(
+                                leading: const Flag.fromString("GB",
+                                    height: 50, width: 50, fit: BoxFit.fill),
+                                title: Text(langageList[1]),
+                                onTap: () {},
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }),
                 ]),
                 settingSection("Déconnexion", [
                   settingSectionRow(

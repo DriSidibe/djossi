@@ -41,6 +41,8 @@ Worker defaultWorker = Worker(
   "",
 );
 
+List<String> langageList = ["Français", "Anglais"];
+
 List<Color> colorsList = [
   Colors.blue,
   Colors.red,

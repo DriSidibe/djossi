@@ -194,7 +194,7 @@ Future<void> getCurrentWorker(context) async {
             w["job"],
             w["tel"],
             w["profil_photo"] ?? "",
-            w["hashedPassword"] ?? "",
+            w["hashed_password"] ?? "",
             w["rate"] ?? 0,
             w["description"] ?? "",
           );
@@ -264,4 +264,33 @@ Visibility getWifiUnavailableWidget(BuildContext context) {
       ),
     ),
   );
+}
+
+Future<void> saveInformations(context, params) async {
+  getRessourcesFromApi(
+    socket,
+    'workers/update',
+    params,
+  ).then((value) {
+    if (value.body.toString() == "0") {
+      Fluttertoast.showToast(
+          msg: "Votre profil à etet modifier avec succes",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      getCurrentWorker(context);
+    } else {
+      Fluttertoast.showToast(
+          msg: "Impossible de modifier votre profil",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+  }).onError((error, stackTrace) {
+    debugPrint("-----------this error occures: $error\n$stackTrace-----------");
+  });
 }

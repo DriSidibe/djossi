@@ -13,6 +13,7 @@ class WorkerDetails extends StatefulWidget {
   final String description;
   final String contact;
   final num rate;
+  final Image photo;
   const WorkerDetails({
     super.key,
     required this.lastname,
@@ -20,6 +21,7 @@ class WorkerDetails extends StatefulWidget {
     required this.description,
     required this.contact,
     required this.rate,
+    required this.photo,
   });
 
   @override
@@ -77,12 +79,6 @@ class _WorkerDetailsState extends State<WorkerDetails> {
           padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
           child: Column(
             children: [
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: myPrimaryColor,
-                ),
-              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -90,6 +86,17 @@ class _WorkerDetailsState extends State<WorkerDetails> {
                   ),
                   child: ListView(
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Container(
+                          height: screenSize(context)[0],
+                          width: screenSize(context)[0],
+                          decoration: BoxDecoration(
+                            color: myPrimaryColor,
+                          ),
+                          child: widget.photo,
+                        ),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

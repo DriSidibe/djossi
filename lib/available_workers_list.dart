@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:djossi/my_classes.dart';
 import 'package:djossi/workers_details.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -20,10 +18,7 @@ class WorkersList extends StatefulWidget {
 
 class _WorkersListState extends State<WorkersList> {
   Padding availableWorker(
-      icon, firstname, lastname, contact, description, rate) {
-    final random = Random();
-    final choosenColor = colorsList[random.nextInt(colorsList.length)];
-
+      photo, firstname, lastname, contact, description, rate) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8),
       child: GestureDetector(
@@ -37,6 +32,7 @@ class _WorkersListState extends State<WorkersList> {
                 description: description,
                 contact: contact,
                 rate: rate,
+                photo: photo,
               ),
             ),
           );
@@ -50,10 +46,13 @@ class _WorkersListState extends State<WorkersList> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: Icon(
-                  icon,
-                  color: choosenColor,
-                  size: 80,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: photo,
+                  ),
                 ),
               ),
               Expanded(
@@ -242,14 +241,22 @@ class _WorkersListState extends State<WorkersList> {
     for (var w in Provider.of<GlobalStateModel>(context).allWorkers) {
       if (w.job == widget.categoryTitle &&
           w.tel != Provider.of<GlobalStateModel>(context).currentWorker.tel) {
-        myWorkers.add(availableWorker(
-          FluentIcons.contact_card_16_regular,
-          w.firstname,
-          w.lastname,
-          w.tel,
-          w.description,
-          w.rate,
-        ));
+        myWorkers.add(
+          availableWorker(
+            Image.network(
+              "http://$socket/static/api/images/${w.profilPhoto}",
+              fit: BoxFit.fill,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(defaultProfilPhoto);
+              },
+            ),
+            w.firstname,
+            w.lastname,
+            w.tel,
+            w.description,
+            w.rate,
+          ),
+        );
       }
     }
     return myWorkers;

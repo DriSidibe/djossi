@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_selector/widget/flutter_single_select.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
@@ -76,38 +75,6 @@ class _WorkerProfilState extends State<WorkerProfil> {
         ],
       ),
     );
-  }
-
-  void saveInformations(context, params) {
-    getRessourcesFromApi(
-      socket,
-      'workers/update',
-      params,
-    ).then((value) {
-      if (value.body.toString() == "0") {
-        Fluttertoast.showToast(
-            msg: "Votre profil à etet modifier avec succes",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0);
-        getCurrentWorker(context);
-        setState(() {});
-      } else {
-        Fluttertoast.showToast(
-            msg: "Impossible de modifier votre profil",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            textColor: Colors.white,
-            fontSize: 16.0);
-        setState(() {});
-      }
-    }).onError((error, stackTrace) {
-      debugPrint(
-          "-----------this error occures: $error\n$stackTrace-----------");
-    });
   }
 
   Future getImage(

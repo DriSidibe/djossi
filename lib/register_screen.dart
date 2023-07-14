@@ -487,118 +487,109 @@ class _RegistrerState extends State<Registrer> {
                                               .value.text) &&
                                       !await isTelAlreadyExist(
                                           telTextFieldController.value.text)) {
-                                    if (photoNameFieldController.value.text !=
-                                        "") {
-                                      sendFileToFtpServer(galleryFile)
-                                          .then((value) async {
-                                        List<String> splitedFileName =
-                                            galleryFile.toString().split("/");
-                                        String imageName = splitedFileName[
-                                            splitedFileName.length - 1];
-                                        imageName = imageName.substring(
-                                            0, imageName.length - 1);
-                                        getRessourcesFromApi(
-                                          '192.168.1.191:8000',
-                                          'workers/add',
-                                          {
-                                            'firstname':
-                                                firstnameTextFieldController
-                                                    .value.text
-                                                    .toString(),
-                                            'lastname':
-                                                lastnameTextFieldController
-                                                    .value.text
-                                                    .toString(),
-                                            'job': jobTextFieldValue.toString(),
-                                            'hashed_password':
-                                                passwordTextFieldController
-                                                    .value.text
-                                                    .toString(),
-                                            'tel': telTextFieldController
-                                                .value.text
-                                                .toString(),
-                                            'profil_photo': galleryFile != null
-                                                ? imageName
-                                                : "",
-                                            'email': emailTextFieldController
-                                                .value.text
-                                                .toString()
-                                                .toLowerCase(),
-                                          },
-                                        ).then((response) async {
-                                          if (response.body != "0") {
-                                            Fluttertoast.showToast(
-                                                msg: "Une erreur est survenue",
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                gravity: ToastGravity.BOTTOM,
-                                                timeInSecForIosWeb: 1,
-                                                textColor: Colors.white,
-                                                fontSize: 16.0);
-                                          } else {
-                                            Fluttertoast.showToast(
-                                                msg: "Enrégistré avec succes",
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                gravity: ToastGravity.BOTTOM,
-                                                timeInSecForIosWeb: 1,
-                                                textColor: Colors.white,
-                                                fontSize: 16.0);
+                                    sendFileToFtpServer(galleryFile)
+                                        .then((value) async {
+                                      List<String> splitedFileName =
+                                          galleryFile.toString().split("/");
+                                      String imageName = splitedFileName[
+                                          splitedFileName.length - 1];
+                                      imageName = imageName.substring(
+                                          0, imageName.length - 1);
+                                      getRessourcesFromApi(
+                                        '192.168.1.191:8000',
+                                        'workers/add',
+                                        {
+                                          'firstname':
+                                              firstnameTextFieldController
+                                                  .value.text
+                                                  .toString(),
+                                          'lastname':
+                                              lastnameTextFieldController
+                                                  .value.text
+                                                  .toString(),
+                                          'job': jobTextFieldValue.toString(),
+                                          'hashed_password':
+                                              passwordTextFieldController
+                                                  .value.text
+                                                  .toString(),
+                                          'tel': telTextFieldController
+                                              .value.text
+                                              .toString(),
+                                          'profil_photo': galleryFile != null
+                                              ? imageName
+                                              : "",
+                                          'email': emailTextFieldController
+                                              .value.text
+                                              .toString()
+                                              .toLowerCase(),
+                                        },
+                                      ).then((response) async {
+                                        if (response.body != "0") {
+                                          Fluttertoast.showToast(
+                                              msg: "Une erreur est survenue",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0);
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg: "Enrégistré avec succes",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0);
 
-                                            await (await SharedPreferences
-                                                    .getInstance())
-                                                .setBool('connected', true)
-                                                .then(
-                                              (value) async {
-                                                dynamic id;
-                                                getWorkerBy(
-                                                        emailTextFieldController
-                                                            .value.text)
-                                                    .then(
-                                                  (value) async {
-                                                    id = value.id;
-                                                    await (await SharedPreferences
-                                                            .getInstance())
-                                                        .setInt(
-                                                            'currentWorkerId',
-                                                            id)
-                                                        .then((value) {
-                                                      context.goNamed("base");
-                                                    }).onError((error,
-                                                            stackTrace) {
-                                                      debugPrint(
-                                                          "------can't set current worker id preference on register with error :-----------\n$error\n---------");
-                                                    });
-                                                  },
-                                                ).onError(
-                                                  (error, stackTrace) {
+                                          await (await SharedPreferences
+                                                  .getInstance())
+                                              .setBool('connected', true)
+                                              .then(
+                                            (value) async {
+                                              dynamic id;
+                                              getWorkerBy(
+                                                      emailTextFieldController
+                                                          .value.text)
+                                                  .then(
+                                                (value) async {
+                                                  id = value.id;
+                                                  await (await SharedPreferences
+                                                          .getInstance())
+                                                      .setInt(
+                                                          'currentWorkerId', id)
+                                                      .then((value) {
+                                                    context.goNamed("base");
+                                                  }).onError(
+                                                          (error, stackTrace) {
                                                     debugPrint(
-                                                        "------can't get current worker by id-----------");
-                                                    exit(1);
-                                                  },
-                                                );
-                                              },
-                                            ).onError(
-                                              (error, stackTrace) {
-                                                exit(1);
-                                              },
-                                            );
-                                          }
-                                        });
-                                        setState(() {
-                                          registring = false;
-                                        });
-                                      }).onError((error, stackTrace) {
-                                        debugPrint(
-                                            "------can't sent image to the server-----------");
-                                        setState(() {
-                                          registring = false;
-                                        });
+                                                        "------can't set current worker id preference on register with error :-----------\n$error\n---------");
+                                                  });
+                                                },
+                                              ).onError(
+                                                (error, stackTrace) {
+                                                  debugPrint(
+                                                      "------can't get current worker by id-----------");
+                                                  exit(1);
+                                                },
+                                              );
+                                            },
+                                          ).onError(
+                                            (error, stackTrace) {
+                                              exit(1);
+                                            },
+                                          );
+                                        }
                                       });
-                                    } else {
                                       setState(() {
-                                        isPhotoPicked = false;
                                         registring = false;
                                       });
-                                    }
+                                    }).onError((error, stackTrace) {
+                                      debugPrint(
+                                          "------can't sent image to the server-----------");
+                                      setState(() {
+                                        registring = false;
+                                      });
+                                    });
                                   } else {
                                     Fluttertoast.showToast(
                                         msg:
