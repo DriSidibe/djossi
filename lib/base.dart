@@ -128,6 +128,14 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
                   ),
                 ),
                 height: 150,
+                width: screenSize(context)[0],
+                child: Image.network(
+                  "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).availableJobs[title]}",
+                  fit: BoxFit.fill,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(defaultProfilPhoto);
+                  },
+                ),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,6 +249,15 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
     );
   }
 
+  List<Padding> getJobsCards() {
+    List<Padding> result = [];
+    for (var j
+        in Provider.of<GlobalStateModel>(context).availableJobs.entries) {
+      result.add(jobsCard(j.key, j.value));
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
@@ -318,16 +335,8 @@ class _AcceuilScreenState extends State<AcceuilScreen> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 10, left: 10),
-                child: ListView.builder(
-                  itemBuilder: (context, index) {
-                    return jobsCard(
-                        Provider.of<GlobalStateModel>(context)
-                            .availableJobs[index],
-                        "");
-                  },
-                  itemCount: Provider.of<GlobalStateModel>(context)
-                      .availableJobs
-                      .length,
+                child: ListView(
+                  children: getJobsCards(),
                 ),
               ),
             ),

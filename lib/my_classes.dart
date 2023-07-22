@@ -24,7 +24,7 @@ class Worker {
 
 class GlobalStateModel extends ChangeNotifier {
   Worker _currentWorker = defaultWorker;
-  List<String> _availableJobs = [];
+  Map<String, String> _availableJobs = {};
   List<Worker> _allWorkers = [];
 
   Worker get currentWorker => _currentWorker;
@@ -39,8 +39,8 @@ class GlobalStateModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> get availableJobs => _availableJobs;
-  set availableJobs(List<String> newJobs) {
+  Map<String, String> get availableJobs => _availableJobs;
+  set availableJobs(Map<String, String> newJobs) {
     _availableJobs = newJobs;
     notifyListeners();
   }

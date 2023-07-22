@@ -455,11 +455,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> updateAllAvailableJobsList(context) async {
     getRessourcesFromApi('192.168.1.191:8000', 'jobs', {}).then((value) {
       Map<String, dynamic> data = jsonDecode(value.body);
-      List<String> jobList = [];
-      data.forEach((key, value) {
-        jobList.add(value);
-      });
-      jobList.sort((a, b) => a.toString().compareTo(b.toString()));
+      Map<String, String> jobList = {};
+      for (var j in data.keys.toList()) {
+        jobList[j] = data[j];
+      }
       globalStateModel.availableJobs = jobList;
     }).onError((error, stackTrace) {
       debugPrint(
@@ -476,16 +475,17 @@ class _SplashScreenState extends State<SplashScreen> {
         (key, value) {
           workersList.add(
             Worker(
-                value["id"],
-                value["firstname"],
-                value["lastname"],
-                value["email"],
-                value["job"],
-                value["tel"],
-                value["profil_photo"],
-                value["hashed_password"],
-                value["rate"],
-                value["description"]),
+              value["id"],
+              value["firstname"],
+              value["lastname"],
+              value["email"],
+              value["job"],
+              value["tel"],
+              value["profil_photo"],
+              value["hashed_password"],
+              value["rate"],
+              value["description"],
+            ),
           );
         },
       );

@@ -42,8 +42,12 @@ class _RegistrerState extends State<Registrer> {
   @override
   void initState() {
     setState(() {
-      jobsList.addAll(
-          Provider.of<GlobalStateModel>(context, listen: false).availableJobs);
+      for (var job in Provider.of<GlobalStateModel>(context, listen: false)
+          .availableJobs
+          .keys) {
+        jobsList.add(job);
+      }
+      jobsList.sort((a, b) => a.toString().compareTo(b.toString()));
     });
     super.initState();
   }

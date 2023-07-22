@@ -35,6 +35,7 @@ class _WorkerProfilState extends State<WorkerProfil> {
   var jobTextFieldValue = "";
   File? galleryFile;
   final picker = ImagePicker();
+  bool isEnregistrerBtnClicked = false;
 
   Padding profilAttribute(
       attrName, controller, inputType, filter, callbackFunction) {
@@ -148,256 +149,272 @@ class _WorkerProfilState extends State<WorkerProfil> {
     myDescriptionTextAreaController.text =
         globalStateProvider.currentWorker.description;
     setState(() {
-      jobsList.addAll(
-          Provider.of<GlobalStateModel>(context, listen: false).availableJobs);
+      for (var job in Provider.of<GlobalStateModel>(context, listen: false)
+          .availableJobs
+          .keys) {
+        jobsList.add(job);
+      }
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: GestureDetector(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(
-                FluentIcons.location_12_filled,
-                color: Colors.white,
-                weight: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  "test",
-                  style: getFontStyleFromMediaSize(
-                    context,
-                    384,
-                    640,
-                    TextStyle(
-                      color: Colors.white,
-                      fontSize: myTextSmallFontSize2,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            title: GestureDetector(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(
+                    FluentIcons.location_12_filled,
+                    color: Colors.white,
+                    weight: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      "test",
+                      style: getFontStyleFromMediaSize(
+                        context,
+                        384,
+                        640,
+                        TextStyle(
+                          color: Colors.white,
+                          fontSize: myTextSmallFontSize2,
+                        ),
+                        TextStyle(
+                          color: Colors.white,
+                          fontSize: myTitleFontSize,
+                        ),
+                      ),
                     ),
-                    TextStyle(
-                      color: Colors.white,
-                      fontSize: myTitleFontSize,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                    ),
+                    child: ListView(
+                      children: [
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            Container(
+                              width: screenSize(context)[0],
+                              height: screenSize(context)[0],
+                              decoration: BoxDecoration(
+                                color: myPrimaryColor,
+                              ),
+                              child: Image.network(
+                                "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
+                                fit: BoxFit.fill,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(defaultProfilPhoto);
+                                },
+                              ),
+                            ),
+                            ElevatedButton(
+                                onPressed: () {
+                                  _showPicker(context: context);
+                                },
+                                child: const Icon(Icons.edit))
+                          ],
+                        ),
+                        profilAttribute(
+                          "Nom: ",
+                          lastnameController,
+                          "",
+                          FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'),
+                              allow: true),
+                          () {},
+                        ),
+                        profilAttribute(
+                          "Prenom: ",
+                          firstnameController,
+                          "",
+                          FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'),
+                              allow: true),
+                          () {},
+                        ),
+                        profilAttribute(
+                            "Metier: ",
+                            "",
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 20),
+                                child: CustomSingleSelectField<String>(
+                                  validator: (value) {
+                                    if (value == null ||
+                                        value.isEmpty ||
+                                        jobTextFieldValue ==
+                                            "--selectionnez un métier--") {
+                                      return 'Ce champs doit etre renseigné';
+                                    }
+                                    return null;
+                                  },
+                                  selectedItemColor: myPrimaryColor,
+                                  decoration: InputDecoration(
+                                    border: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                      color: jobTextFieldValue ==
+                                              "--selectionnez un métier--"
+                                          ? Colors.red
+                                          : Colors.black,
+                                    )),
+                                    suffix: const Icon(Icons.unfold_more),
+                                  ),
+                                  items: jobsList,
+                                  title: "Metier",
+                                  initialValue: jobTextFieldValue,
+                                  onSelectionDone: (value) {
+                                    setState(() {
+                                      jobTextFieldValue = value.toString();
+                                    });
+                                  },
+                                  itemAsString: (item) => item,
+                                ),
+                              ),
+                            ),
+                            "",
+                            () {}),
+                        profilAttribute(
+                          "Contact: ",
+                          "",
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: IntlPhoneField(
+                                controller: telTextFieldController,
+                                validator: (value) {
+                                  if (value == null) {
+                                    return 'Ce champs doit etre renseigné';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: 'Numero de telephone',
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide(),
+                                  ),
+                                ),
+                                initialCountryCode: 'CI',
+                                onChanged: (phone) {},
+                              ),
+                            ),
+                          ),
+                          "",
+                          () {},
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
+                          child: RatingBar.builder(
+                            itemSize: myIconSmallSize,
+                            initialRating: globalStateProvider
+                                .currentWorker.rate
+                                .toDouble(),
+                            minRating: 1,
+                            direction: Axis.horizontal,
+                            allowHalfRating: true,
+                            itemCount: 5,
+                            itemPadding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => Icon(
+                              Icons.star,
+                              color: myPrimaryColor,
+                            ),
+                            ignoreGestures: true,
+                            onRatingUpdate: (rating) {},
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+                          child: Text(
+                            "Description",
+                            style: getFontStyleFromMediaSize(
+                              context,
+                              384,
+                              640,
+                              const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: myTextBigFontSize,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: myDescriptionTextAreaController,
+                                maxLines: 20,
+                                minLines: 5,
+                                decoration: myInputDecoration,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isEnregistrerBtnClicked = true;
+                                    });
+                                    saveInformations(context, {
+                                      'id': globalStateProvider.currentWorker.id
+                                          .toString(),
+                                      'firstname': firstnameController
+                                          .value.text
+                                          .toString(),
+                                      'lastname': lastnameController.value.text
+                                          .toString(),
+                                      'job': jobTextFieldValue.toString() ==
+                                              "--selectionnez un métier--"
+                                          ? ""
+                                          : jobTextFieldValue,
+                                      'tel': telTextFieldController.value.text
+                                          .toString(),
+                                      'description':
+                                          myDescriptionTextAreaController.text,
+                                    });
+                                    isEnregistrerBtnClicked = false;
+                                  },
+                                  child: isEnregistrerBtnClicked
+                                      ? const CircularProgressIndicator()
+                                      : const Text("Enregistrer"),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 8,
-                ),
-                child: ListView(
-                  children: [
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        Container(
-                          width: screenSize(context)[0],
-                          height: screenSize(context)[0],
-                          decoration: BoxDecoration(
-                            color: myPrimaryColor,
-                          ),
-                          child: Image.network(
-                            "http://$socket/static/api/images/${Provider.of<GlobalStateModel>(context).currentWorker.profilPhoto}",
-                            fit: BoxFit.fill,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(defaultProfilPhoto);
-                            },
-                          ),
-                        ),
-                        ElevatedButton(
-                            onPressed: () {
-                              _showPicker(context: context);
-                            },
-                            child: const Icon(Icons.edit))
-                      ],
-                    ),
-                    profilAttribute(
-                      "Nom: ",
-                      lastnameController,
-                      "",
-                      FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'),
-                          allow: true),
-                      () {},
-                    ),
-                    profilAttribute(
-                      "Prenom: ",
-                      firstnameController,
-                      "",
-                      FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'),
-                          allow: true),
-                      () {},
-                    ),
-                    profilAttribute(
-                        "Metier: ",
-                        "",
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 20),
-                            child: CustomSingleSelectField<String>(
-                              validator: (value) {
-                                if (value == null ||
-                                    value.isEmpty ||
-                                    jobTextFieldValue ==
-                                        "--selectionnez un métier--") {
-                                  return 'Ce champs doit etre renseigné';
-                                }
-                                return null;
-                              },
-                              selectedItemColor: myPrimaryColor,
-                              decoration: InputDecoration(
-                                border: UnderlineInputBorder(
-                                    borderSide: BorderSide(
-                                  color: jobTextFieldValue ==
-                                          "--selectionnez un métier--"
-                                      ? Colors.red
-                                      : Colors.black,
-                                )),
-                                suffix: const Icon(Icons.unfold_more),
-                              ),
-                              items: jobsList,
-                              title: "Metier",
-                              initialValue: jobTextFieldValue,
-                              onSelectionDone: (value) {
-                                setState(() {
-                                  jobTextFieldValue = value.toString();
-                                });
-                              },
-                              itemAsString: (item) => item,
-                            ),
-                          ),
-                        ),
-                        "",
-                        () {}),
-                    profilAttribute(
-                      "Contact: ",
-                      "",
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: IntlPhoneField(
-                            controller: telTextFieldController,
-                            validator: (value) {
-                              if (value == null) {
-                                return 'Ce champs doit etre renseigné';
-                              }
-                              return null;
-                            },
-                            decoration: const InputDecoration(
-                              labelText: 'Numero de telephone',
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide(),
-                              ),
-                            ),
-                            initialCountryCode: 'CI',
-                            onChanged: (phone) {},
-                          ),
-                        ),
-                      ),
-                      "",
-                      () {},
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      child: RatingBar.builder(
-                        itemSize: myIconSmallSize,
-                        initialRating:
-                            globalStateProvider.currentWorker.rate.toDouble(),
-                        minRating: 1,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        itemCount: 5,
-                        itemPadding:
-                            const EdgeInsets.symmetric(horizontal: 4.0),
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: myPrimaryColor,
-                        ),
-                        ignoreGestures: true,
-                        onRatingUpdate: (rating) {},
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-                      child: Text(
-                        "Description",
-                        style: getFontStyleFromMediaSize(
-                          context,
-                          384,
-                          640,
-                          const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: myTextBigFontSize,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: myDescriptionTextAreaController,
-                            maxLines: 20,
-                            minLines: 5,
-                            decoration: myInputDecoration,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                saveInformations(context, {
-                                  'id': globalStateProvider.currentWorker.id
-                                      .toString(),
-                                  'firstname':
-                                      firstnameController.value.text.toString(),
-                                  'lastname':
-                                      lastnameController.value.text.toString(),
-                                  'job': jobTextFieldValue.toString() ==
-                                          "--selectionnez un métier--"
-                                      ? ""
-                                      : jobTextFieldValue,
-                                  'tel': telTextFieldController.value.text
-                                      .toString(),
-                                  'description':
-                                      myDescriptionTextAreaController.text,
-                                });
-                              },
-                              child: const Text("Enregistrer"),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+        getWifiUnavailableWidget(context),
+      ],
     );
   }
 }
